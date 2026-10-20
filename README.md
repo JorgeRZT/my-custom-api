@@ -2,8 +2,8 @@
 
 Crea tus propias URLs de API públicas en Cloudflare Workers y define qué devuelven (contenido, status code y formato) desde un dashboard.
 
-- **Dashboard**: `https://<tu-worker>.workers.dev/` (acceso solo con login de Google)
-- **APIs públicas**: `https://<tu-worker>.workers.dev/api/<ruta>` o, por usuario, `/api/u/<id>/<ruta>` (abiertas, con CORS `*`)
+- **Dashboard**: `https://mycustomapi.online/` (acceso solo con login de Google)
+- **APIs públicas**: `https://mycustomapi.online/api/<ruta>` o, por usuario, `/api/u/<id>/<ruta>` (abiertas, con CORS `*`)
 
 ## Funcionalidades
 - Rutas anidadas (`/api/users/list`), método (`ANY`, `GET`, `POST`, …), status code 200–599
@@ -17,7 +17,7 @@ Crea tus propias URLs de API públicas en Cloudflare Workers y define qué devue
 El dashboard solo permite entrar con Google. Los botones **LLM Access** (token personal para LLMs) y **API Keys** están en la cabecera. El `ADMIN_TOKEN` global y los tokens personales siguen valiendo para la Admin API y los LLM, pero no para el dashboard.
 
 1. En [Google Cloud Console](https://console.cloud.google.com/apis/credentials) crea un **OAuth client ID** de tipo *Web application*.
-2. Añade como *Authorized redirect URI*: `https://<tu-worker>.workers.dev/auth/google/callback` (y `http://localhost:8787/auth/google/callback` para local).
+2. Añade como *Authorized redirect URI*: `https://mycustomapi.online/auth/google/callback` (y `http://localhost:8787/auth/google/callback` para local).
 3. Define las variables:
    - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
    - `ALLOWED_EMAILS`: cuentas autorizadas separadas por comas; admite `*@dominio.com`. Si está vacía, nadie puede entrar con Google.
@@ -52,6 +52,9 @@ npm install
 cp .dev.vars.example .dev.vars   # define ADMIN_TOKEN
 npm run dev                      # http://localhost:8787
 ```
+
+## Dominio
+El Worker se sirve en `mycustomapi.online` (Custom Domain en `wrangler.jsonc`, el DNS lo crea Cloudflare al desplegar). La variable `PUBLIC_URL` fija el origen que aparece en `llms.txt`, OpenAPI y las URLs públicas; en local se sobreescribe en `.dev.vars`.
 
 ## Despliegue en Cloudflare
 ```bash

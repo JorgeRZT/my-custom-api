@@ -130,14 +130,15 @@ export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
     const p = url.pathname;
+    const origin = (env.PUBLIC_URL || url.origin).replace(/\/+$/, "");
     try {
       if (p.startsWith("/api/")) return await handlePublic(req, env, normalizeSlug(p.slice(5)));
-      if (p.startsWith("/_admin/")) return await handleAdmin(req, env, p.slice(8), url.origin);
+      if (p.startsWith("/_admin/")) return await handleAdmin(req, env, p.slice(8), origin);
       if (p.startsWith("/auth/")) return await handleAuth(req, env, p.slice(6));
       if (p === "/llms.txt") {
-        return new Response(llmsTxt(url.origin), { headers: { "Content-Type": "text/plain; charset=utf-8", ...CORS } });
+        return new Response(llmsTxt(origin), { headers: { "Content-Type": "text/plain; charset=utf-8", ...CORS } });
       }
-      if (p === "/openapi.json") return json(openApiSpec(url.origin), 200, CORS);
+      if (p === "/openapi.json") return json(openApiSpec(origin), 200, CORS);
       return env.ASSETS.fetch(req);
     } catch (err) {
       console.error(err);

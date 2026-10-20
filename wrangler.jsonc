@@ -13,5 +13,8 @@
   "kv_namespaces": [
     { "binding": "ENDPOINTS" }
   ],
+  // Canonical public origin: used in llms.txt, OpenAPI and the public URLs the API reports.
+  "vars": { "PUBLIC_URL": "https://mycustomapi.online" },
+  "routes": [{ "pattern": "mycustomapi.online", "custom_domain": true }],
   "observability": { "enabled": true }
 }
