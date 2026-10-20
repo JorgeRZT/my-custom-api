@@ -48,12 +48,16 @@
   <div class="actions">
     <a class="btn" href="/llms.txt" target="_blank" title="Documentación para LLMs">🤖 llms.txt</a>
     <a class="btn" href="/openapi.json" target="_blank" title="Especificación OpenAPI">OpenAPI</a>
-    <span id="headerActions" hidden><button id="logoutBtn">Salir</button></span>
+    <span id="headerActions" hidden><span class="muted" id="userInfo"></span> <button id="logoutBtn">Salir</button></span>
   </div>
 </header>
 
 <section id="loginView" class="login" hidden>
   <h2 style="margin-top:0">Acceso al dashboard</h2>
+  <div id="googleWrap" hidden>
+    <a class="btn" id="googleBtn" href="/auth/google" style="width:100%;text-align:center;padding:10px 12px">Continuar con Google</a>
+    <p class="muted" style="text-align:center;margin:12px 0">o con token</p>
+  </div>
   <p class="muted">Introduce tu <code>ADMIN_TOKEN</code>.</p>
   <form id="loginForm">
     <input id="tokenInput" type="password" placeholder="Admin token" autocomplete="current-password" required />
@@ -109,6 +113,7 @@
 const $ = (s) => document.querySelector(s);
 const BASE = location.origin + "/api/";
 let token = localStorage.getItem("adminToken") || "";
+let googleEnabled = false;
 let endpoints = [];
 let editingSlug = null;
 
@@ -116,8 +121,8 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<
 const urlFor = (slug) => BASE + slug.split("/").map(encodeURIComponent).join("/");
 
 async function api(path, opts = {}) {
-  const res = await fetch("/_admin/" + path, { ...opts, headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json", ...(opts.headers || {}) } });
-  if (res.status === 401) { logout(); throw new Error("Token inválido"); }
+  const res = await fetch("/_admin/" + path, { ...opts, headers: { ...(token ? { "Authorization": "Bearer " + token } : {}), "Content-Type": "application/json", ...(opts.headers || {}) } });
+  if (res.status === 401) { await logout(); throw new Error("Sesión o token inválido"); }
   if (res.status === 204) return null;
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Error " + res.status);
@@ -130,7 +135,12 @@ function show(view) {
   $("#headerActions").hidden = view !== "app";
 }
 
-function logout() { token = ""; localStorage.removeItem("adminToken"); show("login"); }
+async function logout() {
+  token = ""; localStorage.removeItem("adminToken");
+  await fetch("/auth/logout", { method: "POST" }).catch(() => {});
+  $("#userInfo").textContent = "";
+  show("login");
+}
 
 async function load() {
   endpoints = await api("endpoints");
@@ -241,7 +251,24 @@ $("#list").addEventListener("click", async (e) => {
   if (act === "del" && confirm(`¿Borrar /api/${slug}?`)) { await api("endpoints/" + slug.split("/").map(encodeURIComponent).join("/"), { method: "DELETE" }); await load(); }
 });
 
-if (token) load().then(() => show("app")).catch(() => show("login")); else show("login");
+const LOGIN_ERRORS = { denied: "Acceso cancelado.", state: "Sesión de login no válida, inténtalo de nuevo.", token: "Google rechazó el login.", userinfo: "No se pudo leer tu cuenta de Google.", unverified: "El email de Google no está verificado.", forbidden: "Esta cuenta de Google no tiene acceso." };
+
+async function init() {
+  const err = new URLSearchParams(location.search).get("login_error");
+  if (err) history.replaceState(null, "", "/");
+  const me = await fetch("/auth/me").then(async (r) => ({ ok: r.ok, data: await r.json() })).catch(() => null);
+  if (me?.ok) {
+    $("#userInfo").textContent = me.data.user.email;
+    token = "";
+  } else {
+    googleEnabled = !!me?.data?.googleEnabled;
+    $("#googleWrap").hidden = !googleEnabled;
+  }
+  if (err) $("#loginError").textContent = LOGIN_ERRORS[err] || "Error de login.";
+  if (me?.ok || token) { try { await load(); show("app"); return; } catch {} }
+  show("login");
+}
+init();
 </script>
 </body>
 </html>

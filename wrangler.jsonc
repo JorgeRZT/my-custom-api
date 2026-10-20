@@ -6,7 +6,7 @@
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
-    "run_worker_first": ["/api/*", "/_admin/*", "/llms.txt", "/openapi.json"]
+    "run_worker_first": ["/api/*", "/_admin/*", "/auth/*", "/llms.txt", "/openapi.json"]
   },
   // KV namespace where endpoints are stored.
   // Wrangler auto-provisions it on the first `wrangler deploy` if no id is set.

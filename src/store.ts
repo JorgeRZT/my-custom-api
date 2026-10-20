@@ -2,6 +2,10 @@ export interface Env {
   ENDPOINTS: KVNamespace;
   ASSETS: Fetcher;
   ADMIN_TOKEN: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+  /** Comma-separated emails or "*@domain.com" patterns allowed to sign in with Google. */
+  ALLOWED_EMAILS: string;
 }
 
 export const FORMATS = {

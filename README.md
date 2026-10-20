@@ -13,6 +13,22 @@ Crea tus propias URLs de API públicas en Cloudflare Workers y define qué devue
 - Almacenamiento en Cloudflare KV
 - Documentación para LLMs: `/llms.txt` (instrucciones en lenguaje natural) y `/openapi.json` (OpenAPI 3.1)
 
+## Login con Google (varias cuentas)
+El dashboard permite entrar con Google además del `ADMIN_TOKEN` (que sigue valiendo para la Admin API y los LLM).
+
+1. En [Google Cloud Console](https://console.cloud.google.com/apis/credentials) crea un **OAuth client ID** de tipo *Web application*.
+2. Añade como *Authorized redirect URI*: `https://<tu-worker>.workers.dev/auth/google/callback` (y `http://localhost:8787/auth/google/callback` para local).
+3. Define las variables:
+   - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+   - `ALLOWED_EMAILS`: cuentas autorizadas separadas por comas; admite `*@dominio.com`. Si está vacía, nadie puede entrar con Google.
+
+```bash
+npx wrangler secret put GOOGLE_CLIENT_ID
+npx wrangler secret put GOOGLE_CLIENT_SECRET
+npx wrangler secret put ALLOWED_EMAILS
+```
+Las sesiones duran 7 días, se guardan en KV y quitar un email de `ALLOWED_EMAILS` las invalida.
+
 ## Uso con un LLM
 Pasa al LLM la URL `https://<tu-worker>/llms.txt` y tu `ADMIN_TOKEN`. Con esa información puede listar, crear, editar y borrar endpoints usando la Admin API.
 Para herramientas que importan OpenAPI (GPT Actions, function calling, etc.) usa `https://<tu-worker>/openapi.json` con autenticación Bearer.

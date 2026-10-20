@@ -1,1 +1,5 @@
 ADMIN_TOKEN=change-me
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+# Comma-separated emails or *@domain.com patterns allowed to sign in with Google
+ALLOWED_EMAILS=you@gmail.com,other@gmail.com

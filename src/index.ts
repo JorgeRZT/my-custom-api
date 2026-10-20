@@ -1,3 +1,4 @@
+import { getSession, handleAuth } from "./auth";
 import { llmsTxt, openApiSpec } from "./docs";
 import {
   Env, FORMATS, contentTypeFor, createEndpoint, deleteEndpoint, getEndpoint, isAuthorized,
@@ -43,7 +44,7 @@ async function handlePublic(req: Request, env: Env, slug: string): Promise<Respo
 }
 
 async function handleAdmin(req: Request, env: Env, path: string): Promise<Response> {
-  if (!isAuthorized(req, env)) return json({ error: "Unauthorized" }, 401);
+  if (!isAuthorized(req, env) && !(await getSession(req, env))) return json({ error: "Unauthorized" }, 401);
   const readBody = () => req.json<any>().catch(() => null);
 
   if (path === "endpoints" || path === "endpoints/") {
@@ -79,6 +80,7 @@ export default {
     try {
       if (p.startsWith("/api/")) return await handlePublic(req, env, normalizeSlug(p.slice(5)));
       if (p.startsWith("/_admin/")) return await handleAdmin(req, env, p.slice(8));
+      if (p.startsWith("/auth/")) return await handleAuth(req, env, p.slice(6));
       if (p === "/llms.txt") {
         return new Response(llmsTxt(url.origin), { headers: { "Content-Type": "text/plain; charset=utf-8", ...CORS } });
       }
