@@ -1,6 +1,12 @@
 {
   "name": "my-custom-api",
   "version": "1.0.0",
+  "description": "Create public mock/static HTTP endpoints on Cloudflare Workers, with Google sign-in, per-account spaces and API keys.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JorgeRZT/my-custom-api.git"
+  },
   "private": true,
   "type": "module",
   "scripts": {

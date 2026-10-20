@@ -7,7 +7,7 @@ export function llmsTxt(origin: string): string {
 
 ## How it works (read this first)
 - **Accounts**: people sign in to the web dashboard (${origin}/) with Google only. Each Google account has its own private set of endpoints; nobody can see or change another account's endpoints.
-- **Tokens**: the admin API is called with \`Authorization: Bearer <TOKEN>\`. A human gets their personal token (starts with \`mca_\`) in the dashboard: sign in with Google, click "Mi token", then "Generar token". It is shown only once. You cannot create tokens yourself, so if you have no token, ask the user for it.
+- **Tokens**: the admin API is called with \`Authorization: Bearer <TOKEN>\`. A human gets their personal token (starts with \`mca_\`) in the dashboard: sign in with Google, click "LLM Access", then "Generate token". It is shown only once. You cannot create tokens yourself, so if you have no token, ask the user for it.
 - **A token only manages its own set**: a personal token manages that account's endpoints. The instance-wide \`ADMIN_TOKEN\` (if the user has it) manages a separate "global" set (legacy). Use whichever token you were given; the API is identical.
 - **API keys (optional protection)**: by default every endpoint is public. A user can create "API keys" (secrets) and make individual endpoints require one, sent by callers in a header of the endpoint's choosing. Keys are different from the Bearer tokens above: a *token* lets you manage endpoints through \`/_admin/*\`; an *API key* only guards calls to the public endpoints. API keys exist only for personal tokens, not for \`ADMIN_TOKEN\`.
 - **Public URLs**: every endpoint is served, without authentication and with CORS \`*\`, at \`<publicBase><slug>\`. \`publicBase\` depends on the token (see below), so never build public URLs by hand: read it from \`GET /_admin/me\`.
@@ -122,7 +122,7 @@ curl <publicBase>users
 
 ## More
 - [OpenAPI 3.1 spec](${origin}/openapi.json): machine-readable admin API, usable for function calling / GPT Actions / tool import (auth: Bearer token).
-- [Dashboard](${origin}/): web UI for humans (Google sign-in, personal token, endpoint editor).
+- [Dashboard](${origin}/): web UI for humans (Google sign-in, LLM Access token, API Keys, endpoint editor).
 `;
 }
 

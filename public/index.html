@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>My Custom API · Mock & static API platform</title>
-<meta name="description" content="Crea endpoints HTTP públicos en el edge de Cloudflare con status, formato, cabeceras y latencia a medida. Protégelos con API keys y automatízalos con un LLM." />
+<meta name="description" content="Create public HTTP endpoints on Cloudflare's edge with custom status, format, headers and latency. Protect them with API keys and automate them with an LLM." />
 <link rel="alternate" type="text/plain" title="LLM documentation" href="/llms.txt" />
 <link rel="service-desc" type="application/json" href="/openapi.json" />
 <style>
@@ -188,13 +188,13 @@
     <a href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
   </nav>
   <div class="spacer"></div>
-  <button class="ghost sm" id="themeBtn" title="Cambiar tema" aria-label="Cambiar tema">Tema</button>
+  <button class="ghost sm" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">Theme</button>
   <div class="user" id="userBar" hidden>
     <div class="avatar" id="avatar"></div>
     <span class="email" id="userEmail"></span>
     <button class="sm" id="keysBtn">API Keys</button>
     <button class="sm" id="llmBtn">LLM Access</button>
-    <button class="ghost sm" id="logoutBtn">Cerrar sesión</button>
+    <button class="ghost sm" id="logoutBtn">Sign out</button>
   </div>
 </header>
 
@@ -203,27 +203,28 @@
   <section class="hero">
     <div>
       <div class="eyebrow"><span>●</span> Cloudflare Workers · KV · edge</div>
-      <h1 class="title">APIs de prueba y respuestas estáticas, en segundos.</h1>
-      <p class="lead">Define qué devuelve cada URL —cuerpo, status, formato, cabeceras y latencia— y consúmela desde cualquier cliente. Cada equipo trabaja en su propio espacio, con claves de acceso por endpoint y documentación lista para LLMs.</p>
+      <h1 class="title">Mock and static APIs, live in seconds.</h1>
+      <p class="lead">Define what each URL returns — body, status, format, headers and latency — and call it from any client. Every account gets its own private space, per-endpoint access keys and LLM-ready documentation.</p>
       <div class="cta">
         <a class="btn lg google" id="googleBtn" href="/auth/google" hidden>
           <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.9 2.4 30.4 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
-          Continuar con Google
+          Continue with Google
         </a>
-        <a class="btn lg" href="/llms.txt" target="_blank" rel="noopener">Ver llms.txt</a>
+        <a class="btn lg" href="/llms.txt" target="_blank" rel="noopener">View llms.txt</a>
       </div>
-      <div class="error" id="loginError" style="margin-top:14px"></div>
+      <p class="muted" style="font-size:12px;margin:14px 0 0">By continuing you agree to the <a href="/terms">Terms of Service</a> and the <a href="/privacy">Privacy Policy</a>.</p>
+      <div class="error" id="loginError" style="margin-top:10px"></div>
     </div>
-    <div class="terminal" aria-label="Ejemplo de uso">
+    <div class="terminal" aria-label="Usage example">
       <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:8px">terminal</span></div>
 <pre id="demoCode"></pre>
     </div>
   </section>
   <section class="features">
-    <div class="feature"><div class="ico">01</div><h3>Espacio por cuenta</h3><p>Cada cuenta de Google tiene su propio conjunto de endpoints, aislado del resto.</p></div>
-    <div class="feature"><div class="ico">02</div><h3>API keys por endpoint</h3><p>Abiertos por defecto. Protege los que quieras con la clave y la cabecera que elijas.</p></div>
-    <div class="feature"><div class="ico">03</div><h3>Pensado para LLMs</h3><p>Token personal, <code>llms.txt</code> y OpenAPI 3.1 para que un agente gestione tus endpoints.</p></div>
-    <div class="feature"><div class="ico">04</div><h3>Simulación realista</h3><p>Status 2xx–5xx, JSON/HTML/XML/CSV, cabeceras, CORS y latencia artificial.</p></div>
+    <div class="feature"><div class="ico">01</div><h3>Private space per account</h3><p>Each Google account gets its own set of endpoints, isolated from everyone else.</p></div>
+    <div class="feature"><div class="ico">02</div><h3>Per-endpoint API keys</h3><p>Open by default. Protect the ones you want with the key and header of your choice.</p></div>
+    <div class="feature"><div class="ico">03</div><h3>Built for LLMs</h3><p>Personal token, <code>llms.txt</code> and OpenAPI 3.1 so an agent can manage your endpoints.</p></div>
+    <div class="feature"><div class="ico">04</div><h3>Realistic simulation</h3><p>2xx–5xx statuses, JSON/HTML/XML/CSV, headers, CORS and artificial latency.</p></div>
   </section>
 </div>
 
@@ -232,105 +233,108 @@
   <div class="page-head">
     <div>
       <h2>Endpoints</h2>
-      <div class="base" title="URL base de tus endpoints públicos"><span id="baseUrl"></span><button class="sm ghost" id="copyBase">Copiar</button></div>
+      <div class="base" title="Base URL of your public endpoints"><span id="baseUrl"></span><button class="sm ghost" id="copyBase">Copy</button></div>
     </div>
-    <button class="primary" id="newBtn">Nuevo endpoint <kbd>N</kbd></button>
+    <button class="primary" id="newBtn">New endpoint <kbd>N</kbd></button>
   </div>
   <div class="stats" id="stats"></div>
   <div class="toolbar">
     <div class="search">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>
-      <input id="search" placeholder="Filtrar por ruta o descripción…  ( / )" aria-label="Filtrar endpoints" />
+      <input id="search" placeholder="Filter by path or description…  ( / )" aria-label="Filter endpoints" />
     </div>
     <span class="muted" id="count"></span>
   </div>
   <div class="card" id="list"></div>
 </main>
 
-<div class="loading" id="loading">Cargando…</div>
+<div class="loading" id="loading">Loading…</div>
 
 <footer>
   <span>My Custom API</span>
   <a href="/llms.txt" target="_blank" rel="noopener">llms.txt</a>
   <a href="/openapi.json" target="_blank" rel="noopener">OpenAPI 3.1</a>
+  <a href="/privacy">Privacy</a>
+  <a href="/terms">Terms</a>
+  <a href="https://github.com/JorgeRZT/my-custom-api" target="_blank" rel="noopener">GitHub</a>
 </footer>
 
 <!-- Endpoint editor -->
 <dialog autofocus id="editor" class="drawer">
   <form id="epForm" method="dialog" autocomplete="off">
-    <div class="dlg-head"><h3 id="editorTitle">Nuevo endpoint</h3><button type="button" class="ghost sm" data-close="editor" aria-label="Cerrar">Esc</button></div>
+    <div class="dlg-head"><h3 id="editorTitle">New endpoint</h3><button type="button" class="ghost sm" data-close="editor" aria-label="Close">Esc</button></div>
     <div class="dlg-body">
       <div class="field">
-        <label for="f-slug">Ruta</label>
+        <label for="f-slug">Path</label>
         <div class="prefix"><span id="basePrefix"></span><input id="f-slug" name="slug" placeholder="users/list" required spellcheck="false" /></div>
-        <div class="help">Letras, números y <code>- _ . ~ /</code>. Puedes anidar rutas.</div>
+        <div class="help">Letters, numbers and <code>- _ . ~ /</code>. Paths can be nested.</div>
       </div>
       <div class="grid4">
-        <div class="field"><label>Método</label><select name="method"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option><option>ANY</option></select></div>
+        <div class="field"><label>Method</label><select name="method"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option><option>ANY</option></select></div>
         <div class="field"><label>Status</label><input name="status" type="number" min="200" max="599" value="200" required /></div>
-        <div class="field"><label>Formato</label><select name="format"><option value="json">JSON</option><option value="text">Texto</option><option value="html">HTML</option><option value="xml">XML</option><option value="csv">CSV</option><option value="custom">Personalizado…</option></select></div>
-        <div class="field"><label>Latencia (ms)</label><input name="delayMs" type="number" min="0" max="10000" value="0" /></div>
+        <div class="field"><label>Format</label><select name="format"><option value="json">JSON</option><option value="text">Text</option><option value="html">HTML</option><option value="xml">XML</option><option value="csv">CSV</option><option value="custom">Custom…</option></select></div>
+        <div class="field"><label>Latency (ms)</label><input name="delayMs" type="number" min="0" max="10000" value="0" /></div>
       </div>
       <div class="field" id="ctWrap" hidden><label>Content-Type</label><input name="contentType" placeholder="application/vnd.api+json" spellcheck="false" /></div>
       <div class="field">
-        <label>Cuerpo de la respuesta</label>
+        <label>Response body</label>
         <textarea name="body" spellcheck="false" rows="10"></textarea>
-        <div class="help" style="display:flex;justify-content:space-between;align-items:center"><span id="bodyMeta"></span><button type="button" class="sm" id="prettyBtn">Formatear JSON</button></div>
+        <div class="help" style="display:flex;justify-content:space-between;align-items:center"><span id="bodyMeta"></span><button type="button" class="sm" id="prettyBtn">Format JSON</button></div>
       </div>
       <div class="section">
-        <h4>Acceso</h4>
+        <h4>Access</h4>
         <div class="grid2">
-          <div class="field"><label>Clave requerida</label><select name="keyId"></select></div>
-          <div class="field"><label>Cabecera</label><input name="protHeader" placeholder="Authorization" spellcheck="false" /></div>
+          <div class="field"><label>Required key</label><select name="keyId"></select></div>
+          <div class="field"><label>Header</label><input name="protHeader" placeholder="Authorization" spellcheck="false" /></div>
         </div>
         <div class="help" id="protHint" style="margin-top:-6px"></div>
       </div>
       <div class="section">
-        <h4>Avanzado</h4>
-        <div class="field"><label>Cabeceras de respuesta (JSON)</label><textarea name="headers" rows="3" placeholder='{"Cache-Control": "no-store"}' spellcheck="false"></textarea></div>
-        <div class="field"><label>Descripción</label><input name="description" placeholder="Para qué sirve este endpoint" /></div>
+        <h4>Advanced</h4>
+        <div class="field"><label>Response headers (JSON)</label><textarea name="headers" rows="3" placeholder='{"Cache-Control": "no-store"}' spellcheck="false"></textarea></div>
+        <div class="field"><label>Description</label><input name="description" placeholder="What this endpoint is for" /></div>
       </div>
       <div class="section">
-        <h4>Petición equivalente</h4>
+        <h4>Equivalent request</h4>
         <pre class="code" id="curlPreview"></pre>
       </div>
       <div class="error" id="formError"></div>
     </div>
-    <div class="dlg-foot"><button type="button" data-close="editor">Cancelar</button><button class="primary" type="submit">Guardar</button></div>
+    <div class="dlg-foot"><button type="button" data-close="editor">Cancel</button><button class="primary" type="submit">Save</button></div>
   </form>
 </dialog>
 
 <!-- Request tester -->
 <dialog autofocus id="tester">
-  <div class="dlg-head"><h3>Probar endpoint</h3><button class="ghost sm" data-close="tester">Cerrar</button></div>
+  <div class="dlg-head"><h3>Test endpoint</h3><button class="ghost sm" data-close="tester">Close</button></div>
   <div class="dlg-body">
     <div class="mono" id="testReq" style="margin-bottom:12px;word-break:break-all"></div>
     <div class="field" id="testKeyWrap" hidden>
       <label id="testKeyLabel">API key</label>
-      <div class="copy-row"><input id="testKey" type="password" placeholder="Pega la clave para esta cabecera" spellcheck="false" autocomplete="off" /><button class="primary" id="testSend">Enviar</button></div>
+      <div class="copy-row"><input id="testKey" type="password" placeholder="Paste the key for this header" spellcheck="false" autocomplete="off" /><button class="primary" id="testSend">Send</button></div>
     </div>
     <div id="testResult" hidden>
       <div style="display:flex;gap:14px;align-items:center;margin-bottom:10px;flex-wrap:wrap"><span class="st" id="testStatus"></span><span class="muted mono" id="testMeta"></span></div>
-      <label>Cabeceras</label><pre class="code" id="testHeaders" style="max-height:130px;margin-bottom:12px"></pre>
-      <label>Cuerpo</label><pre class="code" id="testBody"></pre>
+      <label>Headers</label><pre class="code" id="testHeaders" style="max-height:130px;margin-bottom:12px"></pre>
+      <label>Body</label><pre class="code" id="testBody"></pre>
     </div>
   </div>
 </dialog>
 
 <!-- API keys -->
 <dialog autofocus id="keysDlg">
-  <div class="dlg-head"><h3>API Keys</h3><button class="ghost sm" data-close="keysDlg">Cerrar</button></div>
+  <div class="dlg-head"><h3>API Keys</h3><button class="ghost sm" data-close="keysDlg">Close</button></div>
   <div class="dlg-body">
-    <p class="muted" style="margin-top:0">Claves para proteger endpoints públicos. Por defecto cada endpoint es abierto; al editarlo eliges qué clave exige y en qué cabecera, p. ej. <code>Authorization: Bearer &lt;clave&gt;</code> o <code>X-API-Key: &lt;clave&gt;</code>. Solo se guarda un hash: el valor se muestra una vez, al crearla.</p>
+    <p class="muted" style="margin-top:0">Keys to protect public endpoints. Every endpoint is open by default; when editing one you choose which key it requires and in which header, e.g. <code>Authorization: Bearer &lt;key&gt;</code> or <code>X-API-Key: &lt;key&gt;</code>. Only a hash is stored: the value is shown once, when you create it.</p>
     <div class="card" id="keysList" style="margin-bottom:16px"></div>
     <div class="notice warn" id="keyNewWrap" hidden>
-      <div style="margin-bottom:8px"><b>Copia la clave ahora.</b> No volverá a mostrarse.</div>
-      <div class="copy-row"><pre class="code" id="keyNew" style="max-height:none"></pre><button id="keyCopy">Copiar</button></div>
+      <div style="margin-bottom:8px"><b>Copy the key now.</b> It will not be shown again.</div>
+      <div class="copy-row"><pre class="code" id="keyNew" style="max-height:none"></pre><button id="keyCopy">Copy</button></div>
     </div>
     <form id="keyForm" class="grid2" style="grid-template-columns:1fr 1fr auto;align-items:end">
-      <div><label>Nombre</label><input name="name" placeholder="clientes" required maxlength="60" /></div>
-      <div><label>Valor (opcional)</label><input name="value" placeholder="se genera automáticamente" minlength="8" spellcheck="false" /></div>
-      <button class="primary" style="height:34px">Crear clave</button>
+      <div><label>Name</label><input name="name" placeholder="clients" required maxlength="60" /></div>
+      <div><label>Value (optional)</label><input name="value" placeholder="generated automatically" minlength="8" spellcheck="false" /></div>
+      <button class="primary" style="height:34px">Create key</button>
     </form>
     <div class="error" id="keysError" style="margin-top:10px"></div>
   </div>
@@ -338,24 +342,24 @@
 
 <!-- LLM access -->
 <dialog autofocus id="llmDlg">
-  <div class="dlg-head"><h3>LLM Access</h3><button class="ghost sm" data-close="llmDlg">Cerrar</button></div>
+  <div class="dlg-head"><h3>LLM Access</h3><button class="ghost sm" data-close="llmDlg">Close</button></div>
   <div class="dlg-body">
-    <p class="muted" style="margin-top:0">Un token personal permite a un LLM o a un script gestionar <b>tus</b> endpoints mediante la Admin API. No protege tus endpoints públicos: para eso usa <b>API Keys</b>.</p>
+    <p class="muted" style="margin-top:0">A personal token lets an LLM or a script manage <b>your</b> endpoints through the Admin API. It does not protect your public endpoints: use <b>API Keys</b> for that.</p>
     <ol class="steps">
-      <li><b>Genera</b> un token (se muestra una sola vez).</li>
-      <li>Dale al LLM la URL <code id="llmsUrl"></code> y el token.</li>
-      <li>Revócalo cuando ya no lo necesites.</li>
+      <li><b>Generate</b> a token (shown only once).</li>
+      <li>Give the LLM the URL <code id="llmsUrl"></code> and the token.</li>
+      <li>Revoke it when you no longer need it.</li>
     </ol>
     <div id="tokenStatus" class="muted" style="margin-bottom:10px"></div>
     <div id="tokenNewWrap" hidden>
       <label>Token</label>
-      <div class="copy-row" style="margin-bottom:12px"><pre class="code" id="tokenValue" style="max-height:none"></pre><button id="tokenCopy">Copiar</button></div>
-      <label>Prompt listo para pegar</label>
-      <div class="copy-row"><pre class="code" id="promptValue" style="max-height:none"></pre><button id="promptCopy">Copiar</button></div>
+      <div class="copy-row" style="margin-bottom:12px"><pre class="code" id="tokenValue" style="max-height:none"></pre><button id="tokenCopy">Copy</button></div>
+      <label>Ready-to-paste prompt</label>
+      <div class="copy-row"><pre class="code" id="promptValue" style="max-height:none"></pre><button id="promptCopy">Copy</button></div>
     </div>
     <div class="error" id="tokenError"></div>
   </div>
-  <div class="dlg-foot"><button class="danger" id="tokenRevoke" hidden>Revocar</button><button class="primary" id="tokenGen"></button></div>
+  <div class="dlg-foot"><button class="danger" id="tokenRevoke" hidden>Revoke</button><button class="primary" id="tokenGen"></button></div>
 </dialog>
 
 <script>
@@ -374,12 +378,12 @@ function toast(msg) {
   t.textContent = msg; t.hidden = false;
   clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 1800);
 }
-async function copy(text, msg = "Copiado") {
-  try { await navigator.clipboard.writeText(text); toast(msg); } catch { toast("No se pudo copiar"); }
+async function copy(text, msg = "Copied") {
+  try { await navigator.clipboard.writeText(text); toast(msg); } catch { toast("Could not copy"); }
 }
 async function api(path, opts = {}) {
   const res = await fetch("/_admin/" + path, { ...opts, headers: { "Content-Type": "application/json", ...(opts.headers || {}) } });
-  if (res.status === 401) { await logout(); throw new Error("Sesión caducada"); }
+  if (res.status === 401) { await logout(); throw new Error("Session expired"); }
   const data = await res.json().catch(() => null);
   if (!res.ok) throw new Error(data?.error || "Error " + res.status);
   return data;
@@ -406,19 +410,19 @@ $("#themeBtn").onclick = () => {
 function renderDemo() {
   const o = location.origin;
   $("#demoCode").innerHTML =
-`<span class="c-m"># 1 · crea un endpoint</span>
+`<span class="c-m"># 1 · create an endpoint</span>
 <span class="c-a">curl</span> -X POST ${esc(o)}/_admin/endpoints \\
   -H <span class="c-ok">"Authorization: Bearer $TOKEN"</span> \\
   -d <span class="c-w">'{"slug":"users","status":200,
        "body":"[{\\"id\\":1}]"}'</span>
 
-<span class="c-m"># 2 · consúmelo desde cualquier cliente</span>
-<span class="c-a">curl</span> -i ${esc(o)}/api/u/<span class="c-ok">&lt;tu-id&gt;</span>/users
+<span class="c-m"># 2 · call it from any client</span>
+<span class="c-a">curl</span> -i ${esc(o)}/api/u/<span class="c-ok">&lt;your-id&gt;</span>/users
 <span class="c-m">HTTP/2 200
 content-type: application/json
 access-control-allow-origin: *</span>
 
-<span class="c-m"># 3 · protégelo con una API key</span>
+<span class="c-m"># 3 · protect it with an API key</span>
 <span class="c-a">curl</span> -H <span class="c-ok">"X-API-Key: sk_…"</span> ${esc(o)}/api/u/…/private`;
 }
 
@@ -427,19 +431,19 @@ function render() {
   const q = $("#search").value.trim().toLowerCase();
   const items = S.endpoints.filter((e) => !q || e.slug.toLowerCase().includes(q) || (e.description || "").toLowerCase().includes(q));
   const protectedN = S.endpoints.filter((e) => e.protection).length;
-  $("#stats").innerHTML = `<div class="stat"><b>${S.endpoints.length}</b><span>Endpoints</span></div><div class="stat"><b>${S.endpoints.length - protectedN}</b><span>Abiertos</span></div><div class="stat"><b>${protectedN}</b><span>Protegidos</span></div><div class="stat"><b>${S.keys.length}</b><span>API keys</span></div>`;
-  $("#count").textContent = q ? `${items.length} de ${S.endpoints.length}` : "";
+  $("#stats").innerHTML = `<div class="stat"><b>${S.endpoints.length}</b><span>Endpoints</span></div><div class="stat"><b>${S.endpoints.length - protectedN}</b><span>Open</span></div><div class="stat"><b>${protectedN}</b><span>Protected</span></div><div class="stat"><b>${S.keys.length}</b><span>API keys</span></div>`;
+  $("#count").textContent = q ? `${items.length} of ${S.endpoints.length}` : "";
   if (!S.endpoints.length) {
-    $("#list").innerHTML = `<div class="empty"><h3>Aún no tienes endpoints</h3><p>Crea el primero y tendrás una URL pública al instante.</p><button class="primary" data-act="new">Nuevo endpoint</button></div>`;
+    $("#list").innerHTML = `<div class="empty"><h3>No endpoints yet</h3><p>Create your first one and get a public URL instantly.</p><button class="primary" data-act="new">New endpoint</button></div>`;
     return;
   }
-  if (!items.length) { $("#list").innerHTML = `<div class="empty"><p style="margin:0">Ningún endpoint coincide con “${esc(q)}”.</p></div>`; return; }
+  if (!items.length) { $("#list").innerHTML = `<div class="empty"><p style="margin:0">No endpoints match “${esc(q)}”.</p></div>`; return; }
   const keyName = (id) => S.keys.find((k) => k.id === id)?.name;
-  $("#list").innerHTML = `<table><thead><tr><th>Método</th><th>Ruta</th><th>Status</th><th>Formato</th><th>Acceso</th><th></th></tr></thead><tbody>${items.map((e) => {
+  $("#list").innerHTML = `<table><thead><tr><th>Method</th><th>Path</th><th>Status</th><th>Format</th><th>Access</th><th></th></tr></thead><tbody>${items.map((e) => {
     const s = e.status;
     const access = e.protection
-      ? `<span class="pill lock" title="Cabecera ${esc(e.protection.header)}">Clave · ${esc(keyName(e.protection.keyId) ?? "eliminada")}</span>`
-      : `<span class="pill open">Abierto</span>`;
+      ? `<span class="pill lock" title="Header ${esc(e.protection.header)}">Key · ${esc(keyName(e.protection.keyId) ?? "deleted")}</span>`
+      : `<span class="pill open">Open</span>`;
     return `<tr>
       <td><span class="m m-${esc(e.method)}">${esc(e.method)}</span></td>
       <td><a class="path" href="${esc(urlFor(e.slug))}" target="_blank" rel="noopener">/${esc(e.slug)}</a>${e.description ? `<div class="desc">${esc(e.description)}</div>` : ""}</td>
@@ -447,11 +451,11 @@ function render() {
       <td class="mono" style="font-size:12px">${esc(e.format === "custom" ? e.contentType : e.format)}</td>
       <td>${access}</td>
       <td><div class="actions">
-        <button class="ghost sm" data-act="test" data-slug="${esc(e.slug)}">Probar</button>
+        <button class="ghost sm" data-act="test" data-slug="${esc(e.slug)}">Test</button>
         <button class="ghost sm" data-act="url" data-slug="${esc(e.slug)}">URL</button>
         <button class="ghost sm" data-act="curl" data-slug="${esc(e.slug)}">cURL</button>
-        <button class="ghost sm" data-act="edit" data-slug="${esc(e.slug)}">Editar</button>
-        <button class="ghost sm danger" data-act="del" data-slug="${esc(e.slug)}">Borrar</button>
+        <button class="ghost sm" data-act="edit" data-slug="${esc(e.slug)}">Edit</button>
+        <button class="ghost sm danger" data-act="del" data-slug="${esc(e.slug)}">Delete</button>
       </div></td></tr>`;
   }).join("")}</tbody></table>`;
 }
@@ -468,7 +472,7 @@ async function load() {
 /* ---------- curl ---------- */
 function curlFor(ep) {
   const m = ep.method === "ANY" ? "GET" : ep.method;
-  let c = `curl -i${m === "GET" ? "" : " -X " + m} "${urlFor(ep.slug || "<ruta>")}"`;
+  let c = `curl -i${m === "GET" ? "" : " -X " + m} "${urlFor(ep.slug || "<path>")}"`;
   if (ep.protection) {
     const h = ep.protection.header || "Authorization";
     c += ` \\\n  -H "${h}: ${h.toLowerCase() === "authorization" ? "Bearer " : ""}<API_KEY>"`;
@@ -492,8 +496,8 @@ function updateEditorUI() {
   const on = !!f.keyId.value;
   f.protHeader.disabled = !on;
   $("#protHint").textContent = on
-    ? "Quien llame debe enviar la clave en esa cabecera. Con Authorization se espera «Bearer <clave>»."
-    : S.keys.length ? "Abierto: cualquiera con la URL puede llamarlo." : "Abierto: cualquiera con la URL puede llamarlo. Crea una clave en «API Keys» para poder protegerlo.";
+    ? "Callers must send the key in that header. With Authorization, 'Bearer <key>' is expected."
+    : S.keys.length ? "Open: anyone with the URL can call it." : "Open: anyone with the URL can call it. Create a key in “API Keys” to protect it.";
   $("#ctWrap").hidden = f.format.value !== "custom";
   const b = f.body.value;
   $("#bodyMeta").textContent = `${new Blob([b]).size} bytes`;
@@ -503,7 +507,7 @@ function openEditor(ep) {
   S.editing = ep ? ep.slug : null;
   const f = $("#epForm");
   f.reset();
-  $("#editorTitle").textContent = ep ? "Editar endpoint" : "Nuevo endpoint";
+  $("#editorTitle").textContent = ep ? "Edit endpoint" : "New endpoint";
   $("#formError").textContent = "";
   f.slug.value = ep?.slug ?? "";
   f.method.value = ep?.method ?? "GET";
@@ -514,8 +518,8 @@ function openEditor(ep) {
   f.headers.value = ep && Object.keys(ep.headers || {}).length ? JSON.stringify(ep.headers, null, 2) : "";
   f.delayMs.value = ep?.delayMs ?? 0;
   f.description.value = ep?.description ?? "";
-  f.keyId.innerHTML = `<option value="">Ninguna (abierto)</option>` + S.keys.map((k) => `<option value="${esc(k.id)}">${esc(k.name)} · …${esc(k.hint)}</option>`).join("");
-  if (ep?.protection && !S.keys.some((k) => k.id === ep.protection.keyId)) f.keyId.innerHTML += `<option value="${esc(ep.protection.keyId)}">(clave eliminada)</option>`;
+  f.keyId.innerHTML = `<option value="">None (open)</option>` + S.keys.map((k) => `<option value="${esc(k.id)}">${esc(k.name)} · …${esc(k.hint)}</option>`).join("");
+  if (ep?.protection && !S.keys.some((k) => k.id === ep.protection.keyId)) f.keyId.innerHTML += `<option value="${esc(ep.protection.keyId)}">(deleted key)</option>`;
   f.keyId.value = ep?.protection?.keyId ?? "";
   f.protHeader.value = ep?.protection?.header ?? "";
   updateEditorUI();
@@ -527,7 +531,7 @@ $("#epForm").addEventListener("change", updateEditorUI);
 $("#prettyBtn").onclick = () => {
   const f = $("#epForm");
   try { f.body.value = JSON.stringify(JSON.parse(f.body.value), null, 2); $("#formError").textContent = ""; updateEditorUI(); }
-  catch { $("#formError").textContent = "El cuerpo no es JSON válido."; }
+  catch { $("#formError").textContent = "The body is not valid JSON."; }
 };
 $("#epForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -535,14 +539,14 @@ $("#epForm").addEventListener("submit", async (e) => {
   const payload = formPayload();
   payload.headers = {};
   if (f.headers.value.trim()) {
-    try { payload.headers = JSON.parse(f.headers.value); } catch { $("#formError").textContent = "Cabeceras de respuesta: JSON inválido."; return; }
+    try { payload.headers = JSON.parse(f.headers.value); } catch { $("#formError").textContent = "Response headers: invalid JSON."; return; }
   }
   try {
     if (S.editing) await api("endpoints/" + enc(S.editing), { method: "PUT", body: JSON.stringify(payload) });
     else await api("endpoints", { method: "POST", body: JSON.stringify(payload) });
     $("#editor").close();
     await load();
-    toast("Endpoint guardado");
+    toast("Endpoint saved");
   } catch (err) { $("#formError").textContent = err.message; }
 });
 
@@ -566,9 +570,9 @@ async function runTest() {
     $("#testStatus").className = "st st-" + String(res.status)[0];
     $("#testMeta").textContent = `${ms} ms · ${new Blob([text]).size} B`;
     $("#testHeaders").textContent = [...res.headers].map(([k, v]) => `${k}: ${v}`).join("\n");
-    $("#testBody").textContent = body || "(vacío)";
+    $("#testBody").textContent = body || "(empty)";
   } catch (err) {
-    $("#testStatus").textContent = "Error de red"; $("#testStatus").className = "st st-5";
+    $("#testStatus").textContent = "Network error"; $("#testStatus").className = "st st-5";
     $("#testMeta").textContent = err.message; $("#testHeaders").textContent = ""; $("#testBody").textContent = "";
   }
   $("#testResult").hidden = false;
@@ -580,7 +584,7 @@ function openTester(ep) {
   $("#testResult").hidden = true;
   $("#testKey").value = "";
   $("#testKeyWrap").hidden = !ep.protection;
-  if (ep.protection) $("#testKeyLabel").textContent = `API key (cabecera ${ep.protection.header})`;
+  if (ep.protection) $("#testKeyLabel").textContent = `API key (header ${ep.protection.header})`;
   $("#tester").showModal();
   if (ep.protection) { $("#testKey").focus(); } else runTest();
 }
@@ -595,12 +599,12 @@ $("#list").addEventListener("click", async (e) => {
   if (act === "new") return openEditor(null);
   const ep = S.endpoints.find((x) => x.slug === btn.dataset.slug);
   if (!ep) return;
-  if (act === "url") copy(urlFor(ep.slug), "URL copiada");
-  if (act === "curl") copy(curlFor(ep), "cURL copiado");
+  if (act === "url") copy(urlFor(ep.slug), "URL copied");
+  if (act === "curl") copy(curlFor(ep), "cURL copied");
   if (act === "test") openTester(ep);
   if (act === "edit") openEditor(ep);
-  if (act === "del" && confirm(`¿Borrar /${ep.slug}? Esta acción no se puede deshacer.`)) {
-    try { await api("endpoints/" + enc(ep.slug), { method: "DELETE" }); await load(); toast("Endpoint borrado"); }
+  if (act === "del" && confirm(`Delete /${ep.slug}? This cannot be undone.`)) {
+    try { await api("endpoints/" + enc(ep.slug), { method: "DELETE" }); await load(); toast("Endpoint deleted"); }
     catch (err) { toast(err.message); }
   }
 });
@@ -608,16 +612,16 @@ $("#list").addEventListener("click", async (e) => {
 /* ---------- API keys ---------- */
 function renderKeys() {
   $("#keysList").innerHTML = S.keys.length
-    ? `<table class="mini-table"><thead><tr><th>Nombre</th><th>Valor</th><th>Usada en</th><th></th></tr></thead><tbody>${S.keys.map((k) => {
+    ? `<table class="mini-table"><thead><tr><th>Name</th><th>Value</th><th>Used by</th><th></th></tr></thead><tbody>${S.keys.map((k) => {
         const n = S.endpoints.filter((e) => e.protection?.keyId === k.id).length;
-        return `<tr><td>${esc(k.name)}</td><td class="mono">…${esc(k.hint)}</td><td>${n} endpoint${n === 1 ? "" : "s"}</td><td style="text-align:right"><button class="ghost sm danger" data-key="${esc(k.id)}">Borrar</button></td></tr>`;
+        return `<tr><td>${esc(k.name)}</td><td class="mono">…${esc(k.hint)}</td><td>${n} endpoint${n === 1 ? "" : "s"}</td><td style="text-align:right"><button class="ghost sm danger" data-key="${esc(k.id)}">Delete</button></td></tr>`;
       }).join("")}</tbody></table>`
-    : `<div class="empty" style="padding:28px"><p style="margin:0">Todavía no tienes claves.</p></div>`;
+    : `<div class="empty" style="padding:28px"><p style="margin:0">You have no keys yet.</p></div>`;
 }
 $("#keysBtn").onclick = () => { $("#keysError").textContent = ""; $("#keyNewWrap").hidden = true; renderKeys(); $("#keysDlg").showModal(); };
 $("#keysList").addEventListener("click", async (e) => {
   const id = e.target.dataset?.key;
-  if (!id || !confirm("¿Borrar esta clave?")) return;
+  if (!id || !confirm("Delete this key?")) return;
   try { await api("keys/" + id, { method: "DELETE" }); S.keys = await api("keys"); renderKeys(); render(); $("#keysError").textContent = ""; }
   catch (err) { $("#keysError").textContent = err.message; }
 });
@@ -633,7 +637,7 @@ $("#keyForm").addEventListener("submit", async (e) => {
     $("#keyNew").textContent = k.value; $("#keyNewWrap").hidden = false; $("#keysError").textContent = "";
   } catch (err) { $("#keysError").textContent = err.message; }
 });
-$("#keyCopy").onclick = () => copy($("#keyNew").textContent, "Clave copiada");
+$("#keyCopy").onclick = () => copy($("#keyNew").textContent, "Key copied");
 
 /* ---------- LLM access ---------- */
 async function refreshToken(newToken) {
@@ -641,26 +645,26 @@ async function refreshToken(newToken) {
   $("#tokenNewWrap").hidden = !newToken;
   if (newToken) {
     $("#tokenValue").textContent = newToken;
-    $("#promptValue").textContent = `Lee ${location.origin}/llms.txt y usa este token para gestionar mis endpoints: ${newToken}`;
+    $("#promptValue").textContent = `Read ${location.origin}/llms.txt and use this token to manage my endpoints: ${newToken}`;
   }
-  $("#tokenStatus").textContent = newToken ? "Cópialo ahora: no volverá a mostrarse." : info.hasToken ? `Token activo (termina en …${info.hint}). Regenerarlo invalida el anterior.` : "Todavía no has generado ningún token.";
-  $("#tokenGen").textContent = info.hasToken ? "Regenerar token" : "Generar token";
+  $("#tokenStatus").textContent = newToken ? "Copy it now: it will not be shown again." : info.hasToken ? `Active token (ends in …${info.hint}). Regenerating invalidates the previous one.` : "You have not generated a token yet.";
+  $("#tokenGen").textContent = info.hasToken ? "Regenerate token" : "Generate token";
   $("#tokenRevoke").hidden = !info.hasToken;
 }
 $("#llmBtn").onclick = async () => { $("#tokenError").textContent = ""; $("#llmsUrl").textContent = location.origin + "/llms.txt"; await refreshToken(); $("#llmDlg").showModal(); };
 $("#tokenGen").onclick = async () => {
-  if ($("#tokenGen").textContent.startsWith("Regenerar") && !confirm("El token actual dejará de funcionar. ¿Continuar?")) return;
+  if ($("#tokenGen").textContent.startsWith("Regenerate") && !confirm("The current token will stop working. Continue?")) return;
   const res = await fetch("/auth/token", { method: "POST" });
-  if (!res.ok) { $("#tokenError").textContent = "No se pudo generar el token."; return; }
+  if (!res.ok) { $("#tokenError").textContent = "Could not generate the token."; return; }
   await refreshToken((await res.json()).token);
 };
 $("#tokenRevoke").onclick = async () => {
-  if (!confirm("¿Revocar el token? Las integraciones que lo usen dejarán de funcionar.")) return;
+  if (!confirm("Revoke the token? Integrations using it will stop working.")) return;
   await fetch("/auth/token", { method: "DELETE" });
   await refreshToken();
 };
-$("#tokenCopy").onclick = () => copy($("#tokenValue").textContent, "Token copiado");
-$("#promptCopy").onclick = () => copy($("#promptValue").textContent, "Prompt copiado");
+$("#tokenCopy").onclick = () => copy($("#tokenValue").textContent, "Token copied");
+$("#promptCopy").onclick = () => copy($("#promptValue").textContent, "Prompt copied");
 
 /* ---------- global wiring ---------- */
 document.addEventListener("click", (e) => {
@@ -669,7 +673,7 @@ document.addEventListener("click", (e) => {
   if (e.target.matches("dialog")) e.target.close(); // click on backdrop
 });
 $("#newBtn").onclick = () => openEditor(null);
-$("#copyBase").onclick = () => copy(S.base, "URL base copiada");
+$("#copyBase").onclick = () => copy(S.base, "Base URL copied");
 $("#search").oninput = render;
 document.addEventListener("keydown", (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey || !S.user || document.querySelector("dialog[open]")) return;
@@ -686,7 +690,7 @@ async function logout() {
 }
 $("#logoutBtn").onclick = logout;
 
-const LOGIN_ERRORS = { denied: "Acceso cancelado.", state: "La sesión de login no es válida, inténtalo de nuevo.", token: "Google rechazó el login.", userinfo: "No se pudo leer tu cuenta de Google.", unverified: "El email de Google no está verificado.", forbidden: "Esta cuenta de Google no tiene acceso." };
+const LOGIN_ERRORS = { denied: "Sign-in was cancelled.", state: "Invalid sign-in session, please try again.", token: "Google rejected the sign-in.", userinfo: "Could not read your Google account.", unverified: "Your Google email is not verified.", forbidden: "This Google account does not have access." };
 
 async function init() {
   renderDemo();
@@ -701,7 +705,7 @@ async function init() {
   }
   const enabled = !!me?.data?.googleEnabled;
   $("#googleBtn").hidden = !enabled;
-  $("#loginError").textContent = err ? (LOGIN_ERRORS[err] || "Error de login.") : !enabled ? "El login con Google no está configurado en este servidor." : "";
+  $("#loginError").textContent = err ? (LOGIN_ERRORS[err] || "Sign-in error.") : !enabled ? "Google sign-in is not configured on this server." : "";
   view("landing");
 }
 init();
