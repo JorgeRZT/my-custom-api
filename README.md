@@ -2,7 +2,7 @@
 
 Crea tus propias URLs de API públicas en Cloudflare Workers y define qué devuelven (contenido, status code y formato) desde un dashboard.
 
-- **Dashboard**: `https://<tu-worker>.workers.dev/` (protegido con `ADMIN_TOKEN`)
+- **Dashboard**: `https://<tu-worker>.workers.dev/` (acceso solo con login de Google)
 - **APIs públicas**: `https://<tu-worker>.workers.dev/api/<ruta>` o, por usuario, `/api/u/<id>/<ruta>` (abiertas, con CORS `*`)
 
 ## Funcionalidades
@@ -14,7 +14,7 @@ Crea tus propias URLs de API públicas en Cloudflare Workers y define qué devue
 - Documentación para LLMs: `/llms.txt` (instrucciones en lenguaje natural) y `/openapi.json` (OpenAPI 3.1)
 
 ## Login con Google (varias cuentas)
-El dashboard permite entrar con Google además del `ADMIN_TOKEN` (que sigue valiendo para la Admin API y los LLM).
+El dashboard solo permite entrar con Google. El `ADMIN_TOKEN` global y los tokens personales siguen valiendo para la Admin API y los LLM, pero no para el dashboard.
 
 1. En [Google Cloud Console](https://console.cloud.google.com/apis/credentials) crea un **OAuth client ID** de tipo *Web application*.
 2. Añade como *Authorized redirect URI*: `https://<tu-worker>.workers.dev/auth/google/callback` (y `http://localhost:8787/auth/google/callback` para local).
