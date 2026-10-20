@@ -105,6 +105,7 @@
   .stats { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
   .stat { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 16px; min-width:130px; }
   .stat b { display:block; font-size:20px; letter-spacing:-.02em; font-weight:650; }
+  .stat b small { font-size:13px; font-weight:500; }
   .stat span { color:var(--muted); font-size:12px; }
   .toolbar { display:flex; gap:10px; align-items:center; margin-bottom:12px; }
   .search { position:relative; flex:1; max-width:380px; }
@@ -427,12 +428,13 @@ access-control-allow-origin: *</span>
 }
 
 /* ---------- list ---------- */
+const MAX_ENDPOINTS = 50; // keep in sync with MAX_ENDPOINTS_PER_USER in src/store.ts
 function render() {
   const q = $("#search").value.trim().toLowerCase();
   const items = S.endpoints.filter((e) => !q || e.slug.toLowerCase().includes(q) || (e.description || "").toLowerCase().includes(q));
   const protectedN = S.endpoints.filter((e) => e.protection).length;
-  $("#stats").innerHTML = `<div class="stat"><b>${S.endpoints.length}</b><span>Endpoints</span></div><div class="stat"><b>${S.endpoints.length - protectedN}</b><span>Open</span></div><div class="stat"><b>${protectedN}</b><span>Protected</span></div><div class="stat"><b>${S.keys.length}</b><span>API keys</span></div>`;
-  $("#count").textContent = q ? `${items.length} of ${S.endpoints.length}` : "";
+  $("#stats").innerHTML = `<div class="stat"><b>${S.endpoints.length}<small class="muted">/${MAX_ENDPOINTS}</small></b><span>Endpoints</span></div><div class="stat"><b>${S.endpoints.length - protectedN}</b><span>Open</span></div><div class="stat"><b>${protectedN}</b><span>Protected</span></div><div class="stat"><b>${S.keys.length}</b><span>API keys</span></div>`;
+  $("#count").textContent = (q ? `${items.length} of ${S.endpoints.length} · ` : "") + `${S.endpoints.length}/${MAX_ENDPOINTS} endpoints`;
   if (!S.endpoints.length) {
     $("#list").innerHTML = `<div class="empty"><h3>No endpoints yet</h3><p>Create your first one and get a public URL instantly.</p><button class="primary" data-act="new">New endpoint</button></div>`;
     return;

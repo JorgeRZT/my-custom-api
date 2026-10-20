@@ -222,6 +222,7 @@ One KV namespace (`ENDPOINTS`) holds everything:
 
 ## Known limitations
 
+- **50 endpoints per account** — creating more returns `403`. The instance-wide global set (`ADMIN_TOKEN`) is not limited.
 - **No rate limiting** built in — use Cloudflare rate-limiting/WAF rules in front of a public instance.
 - **KV is eventually consistent**: a change can take up to about a minute to be visible in every location.
 - **No self-service account deletion** yet (data can be removed per endpoint/key/token; full deletion is manual).
