@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "my-custom-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/_admin/*"]
+  },
+  // KV namespace where endpoints are stored.
+  // Wrangler auto-provisions it on the first `wrangler deploy` if no id is set.
+  "kv_namespaces": [
+    { "binding": "ENDPOINTS" }
+  ],
+  "observability": { "enabled": true }
+}
