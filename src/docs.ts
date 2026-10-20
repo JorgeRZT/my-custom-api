@@ -31,7 +31,7 @@ export function llmsTxt(origin: string): string {
 - Slugs may contain "/" (e.g. \`users/list\`). In admin URLs just append the segments: \`/_admin/endpoints/users/list\`.
 - Public endpoints answer only to their configured \`method\` (others get 405); \`ANY\` accepts all methods.
 - API key routes (\`/_admin/keys\`) answer 403 to \`ADMIN_TOKEN\`; use a personal token.
-- Errors are JSON \`{"error":"..."}\` with status 400 (validation), 401 (missing/invalid token), 404 (not found), 409 (slug exists).
+- Errors are JSON \`{"error":"..."}\` with status 400 (validation), 401 (missing/invalid token), 403 (limit of 50 endpoints per account reached), 404 (not found), 409 (slug exists).
 - Tokens can only be created, regenerated or revoked from the dashboard by a signed-in human, never through this API.
 
 ## Endpoint fields
@@ -206,7 +206,7 @@ export function openApiSpec(origin: string) {
         post: {
           operationId: "createEndpoint", summary: "Create an endpoint",
           requestBody: body(["slug", "body"]),
-          responses: { 201: one, 400: err, 401: err, 409: err },
+          responses: { 201: one, 400: err, 401: err, 403: err, 409: err },
         },
       },
       "/_admin/endpoints/{slug}": {

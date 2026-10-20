@@ -45,6 +45,8 @@ export type Result<T> = { ok: true; status: number; data: T } | { ok: false; sta
 /** KV key prefix an endpoint set lives under. Global = legacy set managed by ADMIN_TOKEN. */
 export const GLOBAL_NS = "ep:";
 export const userNs = (uid: string) => `uep:${uid}:`;
+/** Maximum endpoints per user account (the global set is not limited). */
+export const MAX_ENDPOINTS_PER_USER = 50;
 const SLUG_RE = /^[a-zA-Z0-9][a-zA-Z0-9._~\-/]{0,199}$/;
 
 export function normalizeSlug(raw: string): string {
@@ -114,6 +116,17 @@ export async function getEndpoint(env: Env, ns: string, slug: string): Promise<E
   return env.ENDPOINTS.get<Endpoint>(ns + normalizeSlug(slug), "json");
 }
 
+async function countEndpoints(env: Env, ns: string): Promise<number> {
+  let count = 0;
+  let cursor: string | undefined;
+  do {
+    const page = await env.ENDPOINTS.list({ prefix: ns, cursor });
+    count += page.keys.length;
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+  return count;
+}
+
 export async function listEndpoints(env: Env, ns: string): Promise<Endpoint[]> {
   const keys: string[] = [];
   let cursor: string | undefined;
@@ -132,6 +145,9 @@ export async function createEndpoint(env: Env, ns: string, input: any): Promise<
   if (await env.ENDPOINTS.get(ns + slug)) return { ok: false, status: 409, error: `Slug '${slug}' already exists` };
   const ep = validate(input, slug);
   if (typeof ep === "string") return { ok: false, status: 400, error: ep };
+  if (ns !== GLOBAL_NS && (await countEndpoints(env, ns)) >= MAX_ENDPOINTS_PER_USER) {
+    return { ok: false, status: 403, error: `Endpoint limit reached (${MAX_ENDPOINTS_PER_USER} per account). Delete one to create another.` };
+  }
   await env.ENDPOINTS.put(ns + slug, JSON.stringify(ep));
   return { ok: true, status: 201, data: ep };
 }
