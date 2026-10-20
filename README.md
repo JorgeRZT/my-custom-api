@@ -14,7 +14,7 @@ Crea tus propias URLs de API públicas en Cloudflare Workers y define qué devue
 - Documentación para LLMs: `/llms.txt` (instrucciones en lenguaje natural) y `/openapi.json` (OpenAPI 3.1)
 
 ## Login con Google (varias cuentas)
-El dashboard solo permite entrar con Google. El `ADMIN_TOKEN` global y los tokens personales siguen valiendo para la Admin API y los LLM, pero no para el dashboard.
+El dashboard solo permite entrar con Google. Los botones **LLM Access** (token personal para LLMs) y **API Keys** están en la cabecera. El `ADMIN_TOKEN` global y los tokens personales siguen valiendo para la Admin API y los LLM, pero no para el dashboard.
 
 1. En [Google Cloud Console](https://console.cloud.google.com/apis/credentials) crea un **OAuth client ID** de tipo *Web application*.
 2. Añade como *Authorized redirect URI*: `https://<tu-worker>.workers.dev/auth/google/callback` (y `http://localhost:8787/auth/google/callback` para local).
@@ -33,6 +33,12 @@ npx wrangler secret put ALLOWED_EMAILS
 - `GET /_admin/me` devuelve el conjunto que gestiona el token y su `publicBase`.
 - El `ADMIN_TOKEN` global sigue existiendo y gestiona las APIs antiguas en `/api/<ruta>`.
 - `ALLOWED_EMAILS` admite también `*` para permitir cualquier cuenta de Google.
+
+### API Keys: proteger endpoints
+- Los endpoints son **abiertos por defecto**. En el dashboard, **API Keys** crea claves (el valor se muestra una sola vez; solo se guarda su hash) y al editar un endpoint eliges qué clave exige y en qué cabecera.
+- `Authorization` espera `Bearer <clave>`; cualquier otra cabecera (p. ej. `X-API-Key`) espera la clave tal cual. Sin clave válida la respuesta es `401`.
+- Por API: `GET/POST /_admin/keys`, `DELETE /_admin/keys/<id>` (409 si está en uso) y el campo `protection` de cada endpoint (`{"keyId","header"}`, o `null` para abrirlo).
+- Solo disponible con token personal o sesión de Google, no con el `ADMIN_TOKEN` global.
 
 Las sesiones duran 7 días, se guardan en KV y quitar un email de `ALLOWED_EMAILS` las invalida.
 

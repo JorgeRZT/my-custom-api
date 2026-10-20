@@ -31,6 +31,8 @@ export interface Endpoint {
   headers: Record<string, string>;
   delayMs: number;
   description?: string;
+  /** Optional: callers must send the chosen API key in `header`. Absent = public. */
+  protection?: { keyId: string; header: string };
   createdAt: string;
   updatedAt: string;
 }
@@ -81,6 +83,14 @@ function validate(input: any, slug: string, existing?: Endpoint | null): Endpoin
   const delayMs = Number(input.delayMs ?? 0);
   if (!Number.isFinite(delayMs) || delayMs < 0 || delayMs > 10000) return "delayMs must be between 0 and 10000.";
 
+  let protection: Endpoint["protection"];
+  if (input.protection != null) {
+    const { keyId, header = "Authorization" } = input.protection;
+    if (typeof keyId !== "string" || !/^[a-f0-9]{8}$/.test(keyId)) return "protection.keyId must be the id of one of your API keys.";
+    if (typeof header !== "string" || !/^[A-Za-z0-9-]{1,64}$/.test(header)) return "protection.header must be a valid header name (letters, numbers, '-').";
+    protection = { keyId, header };
+  }
+
   const now = new Date().toISOString();
   return {
     slug,
@@ -92,6 +102,7 @@ function validate(input: any, slug: string, existing?: Endpoint | null): Endpoin
     headers,
     delayMs,
     description: input.description ? String(input.description).slice(0, 500) : undefined,
+    protection,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
   };

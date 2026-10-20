@@ -1,4 +1,5 @@
 import { authenticate, describePrincipal, handleAuth } from "./auth";
+import { createKey, deleteKey, keyExists, listKeys, verifyKey } from "./keys";
 import { llmsTxt, openApiSpec } from "./docs";
 import {
   Env, FORMATS, GLOBAL_NS, contentTypeFor, createEndpoint, deleteEndpoint, getEndpoint,
@@ -26,7 +27,11 @@ const fromResult = <T>(r: Result<T>) => (r.ok ? json(r.data, r.status) : json({ 
 const USER_SLUG_RE = /^u\/([a-f0-9]{12})\/(.+)$/;
 
 async function handlePublic(req: Request, env: Env, rawSlug: string): Promise<Response> {
-  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
+  if (req.method === "OPTIONS") {
+    // Browsers require sensitive headers such as Authorization to be named explicitly, so echo what they ask for.
+    const allow = req.headers.get("Access-Control-Request-Headers") || "*";
+    return new Response(null, { status: 204, headers: { ...CORS, "Access-Control-Allow-Headers": allow } });
+  }
 
   // /api/u/<userId>/<slug> belongs to a user; anything else is the global (legacy) set.
   const m = USER_SLUG_RE.exec(rawSlug);
@@ -34,6 +39,13 @@ async function handlePublic(req: Request, env: Env, rawSlug: string): Promise<Re
   const slug = m ? m[2] : rawSlug;
   const ep = await getEndpoint(env, ns, slug);
   if (!ep) return json({ error: "Endpoint not found", slug }, 404, CORS);
+
+  if (ep.protection) {
+    const ok = m && (await verifyKey(env, m[1], ep.protection, req.headers.get(ep.protection.header)));
+    if (!ok) {
+      return json({ error: "Unauthorized", hint: `Send a valid key in the '${ep.protection.header}' header` }, 401, CORS);
+    }
+  }
 
   const method = req.method === "HEAD" ? "GET" : req.method;
   if (ep.method !== "ANY" && ep.method !== method) {
@@ -57,10 +69,39 @@ async function handleAdmin(req: Request, env: Env, path: string, origin: string)
 
   if (path === "me" && req.method === "GET") return json(describePrincipal(principal, origin));
 
+  /** Rejects `protection` that points to a key the user doesn't own, or is used from the global set. */
+  const checkProtection = async (input: any): Promise<string | null> => {
+    if (input?.protection == null) return null;
+    if (principal.kind !== "user") return "Protection with API keys is only available for personal tokens.";
+    const keyId = input.protection.keyId;
+    return typeof keyId === "string" && (await keyExists(env, principal.user.id, keyId)) ? null : "protection.keyId does not match any of your API keys.";
+  };
+
+  if (path === "keys" || path.startsWith("keys/")) {
+    if (principal.kind !== "user") return json({ error: "API keys are only available for personal tokens." }, 403);
+    const uid = principal.user.id;
+    if (path === "keys" && req.method === "GET") return json(await listKeys(env, uid));
+    if (path === "keys" && req.method === "POST") {
+      const input = await readBody();
+      if (!input) return json({ error: "Invalid JSON body" }, 400);
+      const r = await createKey(env, uid, input);
+      return r.ok ? json(r.key, 201) : json({ error: r.error }, r.status);
+    }
+    if (path.startsWith("keys/") && req.method === "DELETE") {
+      const id = path.slice(5);
+      const using = (await listEndpoints(env, ns)).filter((e) => e.protection?.keyId === id).map((e) => e.slug);
+      if (using.length) return json({ error: "Key is in use by endpoints. Change or remove their protection first.", endpoints: using }, 409);
+      return (await deleteKey(env, uid, id)) ? json({ deleted: id }) : json({ error: "Not found" }, 404);
+    }
+    return json({ error: "Method not allowed" }, 405);
+  }
+
   if (path === "endpoints" || path === "endpoints/") {
     if (req.method === "GET") return json(await listEndpoints(env, ns));
     if (req.method === "POST") {
       const input = await readBody();
+      const bad = input && (await checkProtection(input));
+      if (bad) return json({ error: bad }, 400);
       return input ? fromResult(await createEndpoint(env, ns, input)) : json({ error: "Invalid JSON body" }, 400);
     }
     return json({ error: "Method not allowed" }, 405);
@@ -74,6 +115,8 @@ async function handleAdmin(req: Request, env: Env, path: string, origin: string)
     }
     if (req.method === "PUT" || req.method === "PATCH") {
       const input = await readBody();
+      const bad = input && (await checkProtection(input));
+      if (bad) return json({ error: bad }, 400);
       return input ? fromResult(await updateEndpoint(env, ns, slug, input)) : json({ error: "Invalid JSON body" }, 400);
     }
     if (req.method === "DELETE") return fromResult(await deleteEndpoint(env, ns, slug));

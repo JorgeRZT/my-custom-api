@@ -38,7 +38,7 @@ function cookie(name: string, value: string, maxAge: number, secure: boolean): s
   return `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secure ? "; Secure" : ""}`;
 }
 
-function randomToken(bytes = 32): string {
+export function randomToken(bytes = 32): string {
   const buf = crypto.getRandomValues(new Uint8Array(bytes));
   return Array.from(buf, (b) => b.toString(16).padStart(2, "0")).join("");
 }
@@ -53,12 +53,12 @@ export function isEmailAllowed(env: Env, email: string): boolean {
     .some((rule) => rule === "*" || (rule.startsWith("*@") ? e.endsWith(rule.slice(1)) : rule === e));
 }
 
-async function sha256(text: string): Promise<string> {
+export async function sha256(text: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-function safeEqual(a: string, b: string): boolean {
+export function safeEqual(a: string, b: string): boolean {
   if (!a || !b || a.length !== b.length) return false;
   let diff = 0;
   for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
