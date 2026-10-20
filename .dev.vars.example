@@ -1,1 +1,7 @@
 ADMIN_TOKEN=change-me
+# Local dev: avoid showing the production domain in llms.txt / public URLs
+PUBLIC_URL=http://localhost:8787
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+# Comma-separated emails or *@domain.com patterns allowed to sign in with Google
+ALLOWED_EMAILS=you@gmail.com,other@gmail.com

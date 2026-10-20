@@ -1,17 +1,20 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "my-custom-api",
+  "name": "my-custom-api-multiaccount",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
-    "run_worker_first": ["/api/*", "/_admin/*", "/llms.txt", "/openapi.json"]
+    "run_worker_first": ["/api/*", "/_admin/*", "/auth/*", "/llms.txt", "/openapi.json"]
   },
   // KV namespace where endpoints are stored.
   // Wrangler auto-provisions it on the first `wrangler deploy` if no id is set.
   "kv_namespaces": [
     { "binding": "ENDPOINTS" }
   ],
+  // Canonical public origin: used in llms.txt, OpenAPI and the public URLs the API reports.
+  "vars": { "PUBLIC_URL": "https://mycustomapi.online" },
+  "routes": [{ "pattern": "mycustomapi.online", "custom_domain": true }],
   "observability": { "enabled": true }
 }

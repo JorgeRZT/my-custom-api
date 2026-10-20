@@ -2,6 +2,12 @@ export interface Env {
   ENDPOINTS: KVNamespace;
   ASSETS: Fetcher;
   ADMIN_TOKEN: string;
+  /** Canonical origin (e.g. https://mycustomapi.online) shown in docs and public URLs; defaults to the request origin. */
+  PUBLIC_URL?: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+  /** Comma-separated emails or "*@domain.com" patterns allowed to sign in with Google. */
+  ALLOWED_EMAILS: string;
 }
 
 export const FORMATS = {
@@ -27,6 +33,8 @@ export interface Endpoint {
   headers: Record<string, string>;
   delayMs: number;
   description?: string;
+  /** Optional: callers must send the chosen API key in `header`. Absent = public. */
+  protection?: { keyId: string; header: string };
   createdAt: string;
   updatedAt: string;
 }
@@ -34,7 +42,9 @@ export interface Endpoint {
 /** Result of a store operation: either data with an HTTP-like status, or an error. */
 export type Result<T> = { ok: true; status: number; data: T } | { ok: false; status: number; error: string };
 
-const KEY_PREFIX = "ep:";
+/** KV key prefix an endpoint set lives under. Global = legacy set managed by ADMIN_TOKEN. */
+export const GLOBAL_NS = "ep:";
+export const userNs = (uid: string) => `uep:${uid}:`;
 const SLUG_RE = /^[a-zA-Z0-9][a-zA-Z0-9._~\-/]{0,199}$/;
 
 export function normalizeSlug(raw: string): string {
@@ -75,6 +85,14 @@ function validate(input: any, slug: string, existing?: Endpoint | null): Endpoin
   const delayMs = Number(input.delayMs ?? 0);
   if (!Number.isFinite(delayMs) || delayMs < 0 || delayMs > 10000) return "delayMs must be between 0 and 10000.";
 
+  let protection: Endpoint["protection"];
+  if (input.protection != null) {
+    const { keyId, header = "Authorization" } = input.protection;
+    if (typeof keyId !== "string" || !/^[a-f0-9]{8}$/.test(keyId)) return "protection.keyId must be the id of one of your API keys.";
+    if (typeof header !== "string" || !/^[A-Za-z0-9-]{1,64}$/.test(header)) return "protection.header must be a valid header name (letters, numbers, '-').";
+    protection = { keyId, header };
+  }
+
   const now = new Date().toISOString();
   return {
     slug,
@@ -86,20 +104,21 @@ function validate(input: any, slug: string, existing?: Endpoint | null): Endpoin
     headers,
     delayMs,
     description: input.description ? String(input.description).slice(0, 500) : undefined,
+    protection,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
   };
 }
 
-export async function getEndpoint(env: Env, slug: string): Promise<Endpoint | null> {
-  return env.ENDPOINTS.get<Endpoint>(KEY_PREFIX + normalizeSlug(slug), "json");
+export async function getEndpoint(env: Env, ns: string, slug: string): Promise<Endpoint | null> {
+  return env.ENDPOINTS.get<Endpoint>(ns + normalizeSlug(slug), "json");
 }
 
-export async function listEndpoints(env: Env): Promise<Endpoint[]> {
+export async function listEndpoints(env: Env, ns: string): Promise<Endpoint[]> {
   const keys: string[] = [];
   let cursor: string | undefined;
   do {
-    const page = await env.ENDPOINTS.list({ prefix: KEY_PREFIX, cursor });
+    const page = await env.ENDPOINTS.list({ prefix: ns, cursor });
     keys.push(...page.keys.map((k) => k.name));
     cursor = page.list_complete ? undefined : page.cursor;
   } while (cursor);
@@ -107,45 +126,36 @@ export async function listEndpoints(env: Env): Promise<Endpoint[]> {
   return items.filter((x): x is Endpoint => !!x).sort((a, b) => a.slug.localeCompare(b.slug));
 }
 
-export async function createEndpoint(env: Env, input: any): Promise<Result<Endpoint>> {
+export async function createEndpoint(env: Env, ns: string, input: any): Promise<Result<Endpoint>> {
   if (!input || typeof input !== "object") return { ok: false, status: 400, error: "Invalid input" };
   const slug = normalizeSlug(String(input.slug ?? ""));
-  if (await env.ENDPOINTS.get(KEY_PREFIX + slug)) return { ok: false, status: 409, error: `Slug '${slug}' already exists` };
+  if (await env.ENDPOINTS.get(ns + slug)) return { ok: false, status: 409, error: `Slug '${slug}' already exists` };
   const ep = validate(input, slug);
   if (typeof ep === "string") return { ok: false, status: 400, error: ep };
-  await env.ENDPOINTS.put(KEY_PREFIX + slug, JSON.stringify(ep));
+  await env.ENDPOINTS.put(ns + slug, JSON.stringify(ep));
   return { ok: true, status: 201, data: ep };
 }
 
 /** Partial update: fields not provided keep their current value. Supports renaming via `slug`. */
-export async function updateEndpoint(env: Env, rawSlug: string, input: any): Promise<Result<Endpoint>> {
+export async function updateEndpoint(env: Env, ns: string, rawSlug: string, input: any): Promise<Result<Endpoint>> {
   if (!input || typeof input !== "object") return { ok: false, status: 400, error: "Invalid input" };
   const slug = normalizeSlug(rawSlug);
-  const existing = await getEndpoint(env, slug);
+  const existing = await getEndpoint(env, ns, slug);
   if (!existing) return { ok: false, status: 404, error: `Endpoint '${slug}' not found` };
   const newSlug = input.slug !== undefined ? normalizeSlug(String(input.slug)) : slug;
-  if (newSlug !== slug && (await env.ENDPOINTS.get(KEY_PREFIX + newSlug))) {
+  if (newSlug !== slug && (await env.ENDPOINTS.get(ns + newSlug))) {
     return { ok: false, status: 409, error: `Slug '${newSlug}' already exists` };
   }
   const ep = validate({ ...existing, ...input }, newSlug, existing);
   if (typeof ep === "string") return { ok: false, status: 400, error: ep };
-  await env.ENDPOINTS.put(KEY_PREFIX + newSlug, JSON.stringify(ep));
-  if (newSlug !== slug) await env.ENDPOINTS.delete(KEY_PREFIX + slug);
+  await env.ENDPOINTS.put(ns + newSlug, JSON.stringify(ep));
+  if (newSlug !== slug) await env.ENDPOINTS.delete(ns + slug);
   return { ok: true, status: 200, data: ep };
 }
 
-export async function deleteEndpoint(env: Env, rawSlug: string): Promise<Result<{ deleted: string }>> {
+export async function deleteEndpoint(env: Env, ns: string, rawSlug: string): Promise<Result<{ deleted: string }>> {
   const slug = normalizeSlug(rawSlug);
-  if (!(await getEndpoint(env, slug))) return { ok: false, status: 404, error: `Endpoint '${slug}' not found` };
-  await env.ENDPOINTS.delete(KEY_PREFIX + slug);
+  if (!(await getEndpoint(env, ns, slug))) return { ok: false, status: 404, error: `Endpoint '${slug}' not found` };
+  await env.ENDPOINTS.delete(ns + slug);
   return { ok: true, status: 200, data: { deleted: slug } };
-}
-
-export function isAuthorized(req: Request, env: Env): boolean {
-  const auth = req.headers.get("Authorization") || "";
-  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
-  if (!env.ADMIN_TOKEN || !token || token.length !== env.ADMIN_TOKEN.length) return false;
-  let diff = 0;
-  for (let i = 0; i < token.length; i++) diff |= token.charCodeAt(i) ^ env.ADMIN_TOKEN.charCodeAt(i);
-  return diff === 0;
 }

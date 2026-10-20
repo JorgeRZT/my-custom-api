@@ -1,168 +1,513 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>My Custom API · Dashboard</title>
+<title>My Custom API · Mock & static API platform</title>
+<meta name="description" content="Create public HTTP endpoints on Cloudflare's edge with custom status, format, headers and latency. Protect them with API keys and automate them with an LLM." />
 <link rel="alternate" type="text/plain" title="LLM documentation" href="/llms.txt" />
 <link rel="service-desc" type="application/json" href="/openapi.json" />
 <style>
-  :root { --bg:#0f1115; --panel:#171a21; --border:#2a2f3a; --text:#e6e8ee; --muted:#8b93a7; --accent:#f38020; --ok:#3fb950; --warn:#d29922; --err:#f85149; }
-  * { box-sizing: border-box; }
-  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text); }
-  header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid var(--border); }
-  header h1 { font-size:18px; margin:0; } header h1 span { color:var(--accent); }
-  main { max-width:1200px; margin:0 auto; padding:24px; }
-  button, .btn { text-decoration:none; display:inline-block; background:var(--panel); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:7px 12px; cursor:pointer; font-size:13px; }
-  button:hover { border-color:var(--muted); }
-  button.primary { background:var(--accent); border-color:var(--accent); color:#111; font-weight:600; }
-  button.danger { color:var(--err); }
-  input, select, textarea { width:100%; background:#0b0d11; color:var(--text); border:1px solid var(--border); border-radius:6px; padding:8px 10px; font-size:14px; font-family:inherit; }
-  textarea { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:13px; min-height:200px; resize:vertical; }
-  label { display:block; font-size:12px; color:var(--muted); margin:12px 0 4px; }
-  table { width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
-  th, td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle; }
-  th { color:var(--muted); font-weight:500; font-size:12px; text-transform:uppercase; }
+  :root {
+    color-scheme: dark;
+    --bg:#0b0d10; --surface:#12151a; --elev:#181c22; --border:#252a33; --border-strong:#343b47;
+    --text:#e7e9ee; --muted:#8a93a3; --accent:#7c93ff; --accent-fg:#0b0d10; --accent-soft:rgba(124,147,255,.12);
+    --ok:#3ecf8e; --warn:#e5a63a; --err:#f0616d; --info:#5aa9ff; --purple:#b48cff;
+    --code-bg:#0e1115; --shadow:0 24px 60px rgba(0,0,0,.5);
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg:#f6f7f9; --surface:#ffffff; --elev:#f1f3f6; --border:#e1e5ea; --border-strong:#c9d0d9;
+    --text:#14181f; --muted:#5f6a7a; --accent:#3b5bdb; --accent-fg:#fff; --accent-soft:rgba(59,91,219,.09);
+    --ok:#12875a; --warn:#a56a07; --err:#d12f41; --info:#1d6fd1; --purple:#7c4ddb;
+    --code-bg:#f1f3f6; --shadow:0 24px 60px rgba(20,24,31,.18);
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      color-scheme: light;
+      --bg:#f6f7f9; --surface:#ffffff; --elev:#f1f3f6; --border:#e1e5ea; --border-strong:#c9d0d9;
+      --text:#14181f; --muted:#5f6a7a; --accent:#3b5bdb; --accent-fg:#fff; --accent-soft:rgba(59,91,219,.09);
+      --ok:#12875a; --warn:#a56a07; --err:#d12f41; --info:#1d6fd1; --purple:#7c4ddb;
+      --code-bg:#f1f3f6; --shadow:0 24px 60px rgba(20,24,31,.18);
+    }
+  }
+  * { box-sizing:border-box; }
+  html { -webkit-text-size-adjust:100%; }
+  body { margin:0; background:var(--bg); color:var(--text); font:14px/1.5 var(--sans); -webkit-font-smoothing:antialiased; }
+  a { color:inherit; }
+  code, pre, .mono { font-family:var(--mono); }
+  [hidden] { display:none !important; }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+
+  /* Buttons & inputs */
+  button, .btn { font:inherit; font-size:13px; font-weight:500; display:inline-flex; align-items:center; justify-content:center; gap:6px; height:32px; padding:0 12px; border-radius:7px; border:1px solid var(--border-strong); background:var(--surface); color:var(--text); cursor:pointer; text-decoration:none; white-space:nowrap; transition:background .12s, border-color .12s; }
+  button:hover, .btn:hover { background:var(--elev); }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .primary { background:var(--accent); border-color:var(--accent); color:var(--accent-fg); }
+  .primary:hover { background:var(--accent); filter:brightness(1.08); }
+  .ghost { border-color:transparent; background:transparent; color:var(--muted); }
+  .ghost:hover { background:var(--elev); color:var(--text); }
+  .danger:hover { color:var(--err); }
+  .sm { height:26px; padding:0 8px; font-size:12px; }
+  .lg { height:40px; padding:0 18px; font-size:14px; }
+  input, select, textarea { font:inherit; font-size:13px; width:100%; background:var(--code-bg); color:var(--text); border:1px solid var(--border-strong); border-radius:7px; padding:0 10px; height:34px; }
+  textarea { padding:9px 10px; height:auto; font-family:var(--mono); font-size:12.5px; line-height:1.55; resize:vertical; tab-size:2; }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+  input::placeholder, textarea::placeholder { color:var(--muted); opacity:.7; }
+  label { display:block; font-size:12px; font-weight:500; color:var(--muted); margin:0 0 5px; }
+  .field { margin-bottom:14px; }
+  .help { font-size:12px; color:var(--muted); margin-top:5px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .grid4 { display:grid; grid-template-columns:110px 1fr 1fr 1fr; gap:12px; }
+  .muted { color:var(--muted); }
+  .error { color:var(--err); font-size:13px; min-height:18px; }
+
+  /* Top bar */
+  .topbar { position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:20px; height:56px; padding:0 24px; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(10px); border-bottom:1px solid var(--border); }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:600; font-size:15px; text-decoration:none; letter-spacing:-.01em; }
+  .logo { width:22px; height:22px; border-radius:6px; background:linear-gradient(135deg, var(--accent), var(--purple)); display:grid; place-items:center; color:var(--accent-fg); font:700 12px var(--mono); }
+  .nav { display:flex; gap:2px; }
+  .nav a { text-decoration:none; color:var(--muted); font-size:13px; padding:6px 10px; border-radius:6px; }
+  .nav a:hover { color:var(--text); background:var(--elev); }
+  .spacer { flex:1; }
+  .user { display:flex; align-items:center; gap:8px; }
+  .avatar { width:26px; height:26px; border-radius:50%; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center; font-weight:600; font-size:12px; }
+  .user .email { color:var(--muted); font-size:13px; max-width:200px; overflow:hidden; text-overflow:ellipsis; }
+
+  /* Landing */
+  .hero { max-width:1080px; margin:0 auto; padding:80px 24px 40px; display:grid; grid-template-columns:1.05fr 1fr; gap:56px; align-items:center; }
+  .eyebrow { display:inline-flex; align-items:center; gap:8px; font:500 12px var(--mono); color:var(--accent); background:var(--accent-soft); padding:4px 10px; border-radius:999px; margin-bottom:20px; }
+  h1.title { font-size:44px; line-height:1.08; letter-spacing:-.035em; margin:0 0 18px; font-weight:650; }
+  .lead { font-size:16px; color:var(--muted); margin:0 0 28px; max-width:520px; }
+  .cta { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  .google { background:#fff; color:#1f1f1f; border-color:#dadce0; }
+  .google:hover { background:#f6f7f8; }
+  .terminal { background:var(--code-bg); border:1px solid var(--border); border-radius:12px; overflow:hidden; box-shadow:var(--shadow); }
+  .terminal-bar { display:flex; gap:6px; align-items:center; padding:10px 14px; border-bottom:1px solid var(--border); color:var(--muted); font:12px var(--mono); }
+  .dot { width:10px; height:10px; border-radius:50%; background:var(--border-strong); }
+  .terminal pre { margin:0; padding:16px; font-size:12.5px; line-height:1.7; overflow:auto; }
+  .c-m { color:var(--muted); } .c-a { color:var(--accent); } .c-ok { color:var(--ok); } .c-w { color:var(--warn); }
+  .features { max-width:1080px; margin:0 auto; padding:24px 24px 72px; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .feature { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px; }
+  .feature h3 { margin:0 0 6px; font-size:14px; font-weight:600; }
+  .feature p { margin:0; color:var(--muted); font-size:13px; }
+  .feature .ico { width:30px; height:30px; border-radius:8px; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center; margin-bottom:12px; font:600 13px var(--mono); }
+  footer { border-top:1px solid var(--border); padding:20px 24px; color:var(--muted); font-size:12px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+
+  /* App */
+  main.app { max-width:1240px; margin:0 auto; padding:28px 24px 64px; }
+  .page-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:18px; }
+  .page-head h2 { margin:0; font-size:22px; letter-spacing:-.02em; font-weight:650; }
+  .base { display:inline-flex; align-items:center; gap:8px; margin-top:8px; font:12px var(--mono); color:var(--muted); background:var(--surface); border:1px solid var(--border); border-radius:7px; padding:5px 6px 5px 10px; max-width:100%; }
+  .base span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .stats { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+  .stat { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 16px; min-width:130px; }
+  .stat b { display:block; font-size:20px; letter-spacing:-.02em; font-weight:650; }
+  .stat span { color:var(--muted); font-size:12px; }
+  .toolbar { display:flex; gap:10px; align-items:center; margin-bottom:12px; }
+  .search { position:relative; flex:1; max-width:380px; }
+  .search input { padding-left:30px; }
+  .search svg { position:absolute; left:10px; top:10px; color:var(--muted); }
+  kbd { font:11px var(--mono); border:1px solid var(--border-strong); border-bottom-width:2px; border-radius:4px; padding:0 5px; color:var(--muted); background:var(--surface); }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  table { width:100%; border-collapse:collapse; }
+  th { text-align:left; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); padding:10px 14px; border-bottom:1px solid var(--border); background:var(--elev); white-space:nowrap; }
+  td { padding:12px 14px; border-bottom:1px solid var(--border); vertical-align:middle; }
   tr:last-child td { border-bottom:none; }
-  code { font-family: ui-monospace, Menlo, monospace; font-size:13px; }
-  .url { color:var(--accent); word-break:break-all; }
-  .badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; border:1px solid var(--border); }
-  .s2 { color:var(--ok); } .s3 { color:var(--muted); } .s4 { color:var(--warn); } .s5 { color:var(--err); }
-  .row { display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; }
-  .actions { display:flex; gap:6px; flex-wrap:wrap; }
-  .toolbar { display:flex; gap:12px; margin-bottom:16px; align-items:center; }
-  .toolbar input { max-width:320px; }
-  .muted { color:var(--muted); font-size:13px; }
-  .empty { padding:40px; text-align:center; color:var(--muted); }
-  dialog { background:var(--panel); color:var(--text); border:1px solid var(--border); border-radius:10px; width:min(800px, 95vw); padding:20px 24px; }
-  dialog::backdrop { background:rgba(0,0,0,.6); }
-  .error { color:var(--err); font-size:13px; min-height:18px; margin-top:8px; }
-  .login { max-width:380px; margin:80px auto; background:var(--panel); padding:24px; border:1px solid var(--border); border-radius:10px; }
-  pre { background:#0b0d11; border:1px solid var(--border); border-radius:6px; padding:12px; overflow:auto; max-height:300px; font-size:12px; }
-  .prefix { display:flex; align-items:center; } .prefix span { padding:8px 10px; background:#0b0d11; border:1px solid var(--border); border-right:none; border-radius:6px 0 0 6px; color:var(--muted); font-size:13px; white-space:nowrap; } .prefix input { border-radius:0 6px 6px 0; }
+  tbody tr:hover { background:color-mix(in srgb, var(--elev) 60%, transparent); }
+  .path { font:13px var(--mono); font-weight:500; text-decoration:none; word-break:break-all; }
+  .path:hover { color:var(--accent); }
+  .desc { color:var(--muted); font-size:12px; margin-top:2px; }
+  .m { display:inline-block; min-width:52px; text-align:center; font:600 11px var(--mono); padding:3px 7px; border-radius:5px; border:1px solid; letter-spacing:.02em; }
+  .m-GET { color:var(--ok); border-color:color-mix(in srgb, var(--ok) 40%, transparent); background:color-mix(in srgb, var(--ok) 10%, transparent); }
+  .m-POST { color:var(--info); border-color:color-mix(in srgb, var(--info) 40%, transparent); background:color-mix(in srgb, var(--info) 10%, transparent); }
+  .m-PUT, .m-PATCH { color:var(--warn); border-color:color-mix(in srgb, var(--warn) 40%, transparent); background:color-mix(in srgb, var(--warn) 10%, transparent); }
+  .m-DELETE { color:var(--err); border-color:color-mix(in srgb, var(--err) 40%, transparent); background:color-mix(in srgb, var(--err) 10%, transparent); }
+  .m-ANY { color:var(--muted); border-color:var(--border-strong); background:var(--elev); }
+  .st { font:600 12px var(--mono); }
+  .st-2 { color:var(--ok); } .st-3 { color:var(--info); } .st-4 { color:var(--warn); } .st-5 { color:var(--err); }
+  .pill { display:inline-flex; align-items:center; gap:5px; font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid var(--border-strong); color:var(--muted); white-space:nowrap; }
+  .pill.lock { color:var(--warn); border-color:color-mix(in srgb, var(--warn) 45%, transparent); background:color-mix(in srgb, var(--warn) 9%, transparent); }
+  .pill.open { color:var(--ok); border-color:color-mix(in srgb, var(--ok) 40%, transparent); background:color-mix(in srgb, var(--ok) 8%, transparent); }
+  .actions { display:flex; gap:2px; justify-content:flex-end; }
+  .empty { padding:56px 24px; text-align:center; }
+  .empty h3 { margin:0 0 6px; font-size:16px; }
+  .empty p { margin:0 0 18px; color:var(--muted); }
+
+  /* Dialogs */
+  dialog { background:var(--surface); color:var(--text); border:1px solid var(--border-strong); border-radius:14px; padding:0; box-shadow:var(--shadow); width:min(680px, calc(100vw - 24px)); max-height:calc(100vh - 40px); }
+  dialog:focus { outline:none; }
+  dialog::backdrop { background:rgba(4,6,9,.62); backdrop-filter:blur(2px); }
+  .dlg-head { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border); }
+  .dlg-head h3 { margin:0; font-size:15px; font-weight:600; }
+  .dlg-body { padding:20px; overflow:auto; max-height:calc(100vh - 190px); }
+  .dlg-foot { display:flex; gap:8px; justify-content:flex-end; padding:14px 20px; border-top:1px solid var(--border); background:var(--elev); border-radius:0 0 14px 14px; }
+  dialog.drawer { margin:0 0 0 auto; height:100vh; max-height:100vh; width:min(660px,100vw); border-radius:0; border-width:0 0 0 1px; display:none; flex-direction:column; animation:slide .18s ease-out; }
+  dialog.drawer[open] { display:flex; }
+  dialog.drawer form { display:flex; flex-direction:column; height:100%; min-height:0; }
+  dialog.drawer .dlg-body { flex:1; max-height:none; }
+  dialog.drawer .dlg-foot { border-radius:0; }
+  @keyframes slide { from { transform:translateX(24px); opacity:0; } to { transform:none; opacity:1; } }
+  .section { border-top:1px solid var(--border); padding-top:18px; margin-top:6px; }
+  .section h4 { margin:0 0 12px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+  .prefix { display:flex; } .prefix span { display:flex; align-items:center; padding:0 10px; background:var(--elev); border:1px solid var(--border-strong); border-right:none; border-radius:7px 0 0 7px; color:var(--muted); font:12px var(--mono); white-space:nowrap; max-width:55%; overflow:hidden; text-overflow:ellipsis; }
+  .prefix input { border-radius:0 7px 7px 0; font-family:var(--mono); }
+  pre.code { position:relative; margin:0; background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:12px 14px; font-size:12px; line-height:1.6; overflow:auto; max-height:260px; white-space:pre-wrap; word-break:break-all; }
+  .copy-row { display:flex; gap:8px; align-items:flex-start; }
+  .copy-row pre { flex:1; }
+  .kv { display:grid; grid-template-columns:auto 1fr; gap:2px 14px; font:12px var(--mono); margin:0; }
+  .kv dt { color:var(--muted); } .kv dd { margin:0; word-break:break-all; }
+  .steps { margin:0 0 16px; padding-left:18px; color:var(--muted); }
+  .steps li { margin:3px 0; }
+  .steps b, .steps code { color:var(--text); }
+  .notice { background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius:8px; padding:10px 12px; font-size:13px; margin-bottom:14px; }
+  .notice.warn { background:color-mix(in srgb, var(--warn) 10%, transparent); border-color:color-mix(in srgb, var(--warn) 40%, transparent); }
+  .mini-table td, .mini-table th { padding:9px 12px; }
+  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--text); color:var(--bg); padding:9px 16px; border-radius:8px; font-size:13px; font-weight:500; z-index:100; box-shadow:var(--shadow); }
+  .loading { padding:60px; text-align:center; color:var(--muted); }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns:1fr; padding-top:48px; gap:32px; }
+    h1.title { font-size:34px; }
+    .features { grid-template-columns:1fr 1fr; }
+    .nav, .user .email { display:none; }
+    th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) { display:none; }
+    .grid4 { grid-template-columns:1fr 1fr; }
+  }
+  @media (max-width: 560px) { .features { grid-template-columns:1fr; } .topbar { padding:0 14px; gap:10px; } main.app { padding:20px 14px 48px; } .grid2 { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
-<header>
-  <h1><span>⚡</span> My Custom API</h1>
-  <div class="actions">
-    <a class="btn" href="/llms.txt" target="_blank" title="Documentación para LLMs">🤖 llms.txt</a>
-    <a class="btn" href="/openapi.json" target="_blank" title="Especificación OpenAPI">OpenAPI</a>
-    <span id="headerActions" hidden><button id="logoutBtn">Salir</button></span>
+
+<header class="topbar">
+  <a class="brand" href="/"><span class="logo">{}</span> My Custom API</a>
+  <nav class="nav">
+    <a href="/llms.txt" target="_blank" rel="noopener">llms.txt</a>
+    <a href="/openapi.json" target="_blank" rel="noopener">OpenAPI</a>
+  </nav>
+  <div class="spacer"></div>
+  <button class="ghost sm" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">Theme</button>
+  <div class="user" id="userBar" hidden>
+    <div class="avatar" id="avatar"></div>
+    <span class="email" id="userEmail"></span>
+    <button class="sm" id="keysBtn">API Keys</button>
+    <button class="sm" id="llmBtn">LLM Access</button>
+    <button class="ghost sm" id="logoutBtn">Sign out</button>
   </div>
 </header>
 
-<section id="loginView" class="login" hidden>
-  <h2 style="margin-top:0">Acceso al dashboard</h2>
-  <p class="muted">Introduce tu <code>ADMIN_TOKEN</code>.</p>
-  <form id="loginForm">
-    <input id="tokenInput" type="password" placeholder="Admin token" autocomplete="current-password" required />
-    <div class="error" id="loginError"></div>
-    <button class="primary" style="width:100%;margin-top:8px">Entrar</button>
-  </form>
-</section>
+<!-- Logged out -->
+<div id="landing" hidden>
+  <section class="hero">
+    <div>
+      <div class="eyebrow"><span>●</span> Cloudflare Workers · KV · edge</div>
+      <h1 class="title">Mock and static APIs, live in seconds.</h1>
+      <p class="lead">Define what each URL returns — body, status, format, headers and latency — and call it from any client. Every account gets its own private space, per-endpoint access keys and LLM-ready documentation.</p>
+      <div class="cta">
+        <a class="btn lg google" id="googleBtn" href="/auth/google" hidden>
+          <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.9 2.4 30.4 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
+          Continue with Google
+        </a>
+        <a class="btn lg" href="/llms.txt" target="_blank" rel="noopener">View llms.txt</a>
+      </div>
+      <p class="muted" style="font-size:12px;margin:14px 0 0">By continuing you agree to the <a href="/terms">Terms of Service</a> and the <a href="/privacy">Privacy Policy</a>.</p>
+      <div class="error" id="loginError" style="margin-top:10px"></div>
+    </div>
+    <div class="terminal" aria-label="Usage example">
+      <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:8px">terminal</span></div>
+<pre id="demoCode"></pre>
+    </div>
+  </section>
+  <section class="features">
+    <div class="feature"><div class="ico">01</div><h3>Private space per account</h3><p>Each Google account gets its own set of endpoints, isolated from everyone else.</p></div>
+    <div class="feature"><div class="ico">02</div><h3>Per-endpoint API keys</h3><p>Open by default. Protect the ones you want with the key and header of your choice.</p></div>
+    <div class="feature"><div class="ico">03</div><h3>Built for LLMs</h3><p>Personal token, <code>llms.txt</code> and OpenAPI 3.1 so an agent can manage your endpoints.</p></div>
+    <div class="feature"><div class="ico">04</div><h3>Realistic simulation</h3><p>2xx–5xx statuses, JSON/HTML/XML/CSV, headers, CORS and artificial latency.</p></div>
+  </section>
+</div>
 
-<main id="appView" hidden>
+<!-- Logged in -->
+<main class="app" id="app" hidden>
+  <div class="page-head">
+    <div>
+      <h2>Endpoints</h2>
+      <div class="base" title="Base URL of your public endpoints"><span id="baseUrl"></span><button class="sm ghost" id="copyBase">Copy</button></div>
+    </div>
+    <button class="primary" id="newBtn">New endpoint <kbd>N</kbd></button>
+  </div>
+  <div class="stats" id="stats"></div>
   <div class="toolbar">
-    <button class="primary" id="newBtn">+ Nueva API URL</button>
-    <input id="search" placeholder="Buscar por ruta o descripción…" />
+    <div class="search">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>
+      <input id="search" placeholder="Filter by path or description…  ( / )" aria-label="Filter endpoints" />
+    </div>
     <span class="muted" id="count"></span>
   </div>
-  <div id="list"></div>
+  <div class="card" id="list"></div>
 </main>
 
-<dialog id="editor">
-  <form id="epForm" method="dialog">
-    <h2 id="editorTitle" style="margin-top:0">Nueva API URL</h2>
-    <label>Ruta</label>
-    <div class="prefix"><span id="basePrefix"></span><input name="slug" placeholder="users/list" required /></div>
-    <div class="row">
-      <div><label>Método</label><select name="method"><option>ANY</option><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option></select></div>
-      <div><label>Status code</label><input name="status" type="number" min="200" max="599" value="200" required /></div>
-      <div><label>Formato</label><select name="format"><option value="json">JSON</option><option value="text">Texto</option><option value="html">HTML</option><option value="xml">XML</option><option value="csv">CSV</option><option value="custom">Personalizado…</option></select></div>
-      <div><label>Retardo (ms)</label><input name="delayMs" type="number" min="0" max="10000" value="0" /></div>
+<div class="loading" id="loading">Loading…</div>
+
+<footer>
+  <span>My Custom API</span>
+  <a href="/llms.txt" target="_blank" rel="noopener">llms.txt</a>
+  <a href="/openapi.json" target="_blank" rel="noopener">OpenAPI 3.1</a>
+  <a href="/privacy">Privacy</a>
+  <a href="/terms">Terms</a>
+  <a href="https://github.com/JorgeRZT/my-custom-api" target="_blank" rel="noopener">GitHub</a>
+</footer>
+
+<!-- Endpoint editor -->
+<dialog autofocus id="editor" class="drawer">
+  <form id="epForm" method="dialog" autocomplete="off">
+    <div class="dlg-head"><h3 id="editorTitle">New endpoint</h3><button type="button" class="ghost sm" data-close="editor" aria-label="Close">Esc</button></div>
+    <div class="dlg-body">
+      <div class="field">
+        <label for="f-slug">Path</label>
+        <div class="prefix"><span id="basePrefix"></span><input id="f-slug" name="slug" placeholder="users/list" required spellcheck="false" /></div>
+        <div class="help">Letters, numbers and <code>- _ . ~ /</code>. Paths can be nested.</div>
+      </div>
+      <div class="grid4">
+        <div class="field"><label>Method</label><select name="method"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option><option>ANY</option></select></div>
+        <div class="field"><label>Status</label><input name="status" type="number" min="200" max="599" value="200" required /></div>
+        <div class="field"><label>Format</label><select name="format"><option value="json">JSON</option><option value="text">Text</option><option value="html">HTML</option><option value="xml">XML</option><option value="csv">CSV</option><option value="custom">Custom…</option></select></div>
+        <div class="field"><label>Latency (ms)</label><input name="delayMs" type="number" min="0" max="10000" value="0" /></div>
+      </div>
+      <div class="field" id="ctWrap" hidden><label>Content-Type</label><input name="contentType" placeholder="application/vnd.api+json" spellcheck="false" /></div>
+      <div class="field">
+        <label>Response body</label>
+        <textarea name="body" spellcheck="false" rows="10"></textarea>
+        <div class="help" style="display:flex;justify-content:space-between;align-items:center"><span id="bodyMeta"></span><button type="button" class="sm" id="prettyBtn">Format JSON</button></div>
+      </div>
+      <div class="section">
+        <h4>Access</h4>
+        <div class="grid2">
+          <div class="field"><label>Required key</label><select name="keyId"></select></div>
+          <div class="field"><label>Header</label><input name="protHeader" placeholder="Authorization" spellcheck="false" /></div>
+        </div>
+        <div class="help" id="protHint" style="margin-top:-6px"></div>
+      </div>
+      <div class="section">
+        <h4>Advanced</h4>
+        <div class="field"><label>Response headers (JSON)</label><textarea name="headers" rows="3" placeholder='{"Cache-Control": "no-store"}' spellcheck="false"></textarea></div>
+        <div class="field"><label>Description</label><input name="description" placeholder="What this endpoint is for" /></div>
+      </div>
+      <div class="section">
+        <h4>Equivalent request</h4>
+        <pre class="code" id="curlPreview"></pre>
+      </div>
+      <div class="error" id="formError"></div>
     </div>
-    <div id="ctWrap" hidden><label>Content-Type personalizado</label><input name="contentType" placeholder="application/vnd.api+json" /></div>
-    <label>Contenido de la respuesta</label>
-    <textarea name="body" spellcheck="false"></textarea>
-    <div class="actions" style="margin-top:6px"><button type="button" id="prettyBtn">Formatear JSON</button></div>
-    <label>Cabeceras extra (JSON, opcional)</label>
-    <textarea name="headers" style="min-height:60px" placeholder='{"Cache-Control": "no-store"}' spellcheck="false"></textarea>
-    <label>Descripción (opcional)</label>
-    <input name="description" />
-    <div class="error" id="formError"></div>
-    <div class="actions" style="justify-content:flex-end;margin-top:12px">
-      <button type="button" id="cancelBtn">Cancelar</button>
-      <button class="primary" type="submit">Guardar</button>
-    </div>
+    <div class="dlg-foot"><button type="button" data-close="editor">Cancel</button><button class="primary" type="submit">Save</button></div>
   </form>
 </dialog>
 
-<dialog id="tester">
-  <h2 style="margin-top:0">Prueba</h2>
-  <div class="muted" id="testMeta"></div>
-  <pre id="testBody"></pre>
-  <div class="actions" style="justify-content:flex-end"><button id="closeTester">Cerrar</button></div>
+<!-- Request tester -->
+<dialog autofocus id="tester">
+  <div class="dlg-head"><h3>Test endpoint</h3><button class="ghost sm" data-close="tester">Close</button></div>
+  <div class="dlg-body">
+    <div class="mono" id="testReq" style="margin-bottom:12px;word-break:break-all"></div>
+    <div class="field" id="testKeyWrap" hidden>
+      <label id="testKeyLabel">API key</label>
+      <div class="copy-row"><input id="testKey" type="password" placeholder="Paste the key for this header" spellcheck="false" autocomplete="off" /><button class="primary" id="testSend">Send</button></div>
+    </div>
+    <div id="testResult" hidden>
+      <div style="display:flex;gap:14px;align-items:center;margin-bottom:10px;flex-wrap:wrap"><span class="st" id="testStatus"></span><span class="muted mono" id="testMeta"></span></div>
+      <label>Headers</label><pre class="code" id="testHeaders" style="max-height:130px;margin-bottom:12px"></pre>
+      <label>Body</label><pre class="code" id="testBody"></pre>
+    </div>
+  </div>
+</dialog>
+
+<!-- API keys -->
+<dialog autofocus id="keysDlg">
+  <div class="dlg-head"><h3>API Keys</h3><button class="ghost sm" data-close="keysDlg">Close</button></div>
+  <div class="dlg-body">
+    <p class="muted" style="margin-top:0">Keys to protect public endpoints. Every endpoint is open by default; when editing one you choose which key it requires and in which header, e.g. <code>Authorization: Bearer &lt;key&gt;</code> or <code>X-API-Key: &lt;key&gt;</code>. Only a hash is stored: the value is shown once, when you create it.</p>
+    <div class="card" id="keysList" style="margin-bottom:16px"></div>
+    <div class="notice warn" id="keyNewWrap" hidden>
+      <div style="margin-bottom:8px"><b>Copy the key now.</b> It will not be shown again.</div>
+      <div class="copy-row"><pre class="code" id="keyNew" style="max-height:none"></pre><button id="keyCopy">Copy</button></div>
+    </div>
+    <form id="keyForm" class="grid2" style="grid-template-columns:1fr 1fr auto;align-items:end">
+      <div><label>Name</label><input name="name" placeholder="clients" required maxlength="60" /></div>
+      <div><label>Value (optional)</label><input name="value" placeholder="generated automatically" minlength="8" spellcheck="false" /></div>
+      <button class="primary" style="height:34px">Create key</button>
+    </form>
+    <div class="error" id="keysError" style="margin-top:10px"></div>
+  </div>
+</dialog>
+
+<!-- LLM access -->
+<dialog autofocus id="llmDlg">
+  <div class="dlg-head"><h3>LLM Access</h3><button class="ghost sm" data-close="llmDlg">Close</button></div>
+  <div class="dlg-body">
+    <p class="muted" style="margin-top:0">A personal token lets an LLM or a script manage <b>your</b> endpoints through the Admin API. It does not protect your public endpoints: use <b>API Keys</b> for that.</p>
+    <ol class="steps">
+      <li><b>Generate</b> a token (shown only once).</li>
+      <li>Give the LLM the URL <code id="llmsUrl"></code> and the token.</li>
+      <li>Revoke it when you no longer need it.</li>
+    </ol>
+    <div id="tokenStatus" class="muted" style="margin-bottom:10px"></div>
+    <div id="tokenNewWrap" hidden>
+      <label>Token</label>
+      <div class="copy-row" style="margin-bottom:12px"><pre class="code" id="tokenValue" style="max-height:none"></pre><button id="tokenCopy">Copy</button></div>
+      <label>Ready-to-paste prompt</label>
+      <div class="copy-row"><pre class="code" id="promptValue" style="max-height:none"></pre><button id="promptCopy">Copy</button></div>
+    </div>
+    <div class="error" id="tokenError"></div>
+  </div>
+  <div class="dlg-foot"><button class="danger" id="tokenRevoke" hidden>Revoke</button><button class="primary" id="tokenGen"></button></div>
 </dialog>
 
 <script>
 const $ = (s) => document.querySelector(s);
-const BASE = location.origin + "/api/";
-let token = localStorage.getItem("adminToken") || "";
-let endpoints = [];
-let editingSlug = null;
-
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
-const urlFor = (slug) => BASE + slug.split("/").map(encodeURIComponent).join("/");
+const enc = (slug) => slug.split("/").map(encodeURIComponent).join("/");
 
+const S = { user: null, base: "", endpoints: [], keys: [], editing: null, testing: null };
+const urlFor = (slug) => S.base + enc(slug);
+
+/* ---------- helpers ---------- */
+let toastTimer;
+function toast(msg) {
+  let t = $(".toast");
+  if (!t) { t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status"); document.body.appendChild(t); }
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 1800);
+}
+async function copy(text, msg = "Copied") {
+  try { await navigator.clipboard.writeText(text); toast(msg); } catch { toast("Could not copy"); }
+}
 async function api(path, opts = {}) {
-  const res = await fetch("/_admin/" + path, { ...opts, headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json", ...(opts.headers || {}) } });
-  if (res.status === 401) { logout(); throw new Error("Token inválido"); }
-  if (res.status === 204) return null;
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Error " + res.status);
+  const res = await fetch("/_admin/" + path, { ...opts, headers: { "Content-Type": "application/json", ...(opts.headers || {}) } });
+  if (res.status === 401) { await logout(); throw new Error("Session expired"); }
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(data?.error || "Error " + res.status);
   return data;
 }
+function view(name) {
+  $("#loading").hidden = true;
+  $("#landing").hidden = name !== "landing";
+  $("#app").hidden = name !== "app";
+  $("#userBar").hidden = name !== "app";
+}
+const STATUS_TEXT = { 200:"OK", 201:"Created", 202:"Accepted", 204:"No Content", 301:"Moved", 302:"Found", 304:"Not Modified", 400:"Bad Request", 401:"Unauthorized", 403:"Forbidden", 404:"Not Found", 409:"Conflict", 422:"Unprocessable", 429:"Too Many Requests", 500:"Server Error", 502:"Bad Gateway", 503:"Unavailable", 504:"Gateway Timeout" };
 
-function show(view) {
-  $("#loginView").hidden = view !== "login";
-  $("#appView").hidden = view !== "app";
-  $("#headerActions").hidden = view !== "app";
+/* ---------- theme ---------- */
+function applyTheme(t) { if (t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme; }
+try { applyTheme(localStorage.getItem("theme")); } catch {}
+$("#themeBtn").onclick = () => {
+  const cur = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+  const next = cur === "light" ? "dark" : "light";
+  applyTheme(next);
+  try { localStorage.setItem("theme", next); } catch {}
+};
+
+/* ---------- landing ---------- */
+function renderDemo() {
+  const o = location.origin;
+  $("#demoCode").innerHTML =
+`<span class="c-m"># 1 · create an endpoint</span>
+<span class="c-a">curl</span> -X POST ${esc(o)}/_admin/endpoints \\
+  -H <span class="c-ok">"Authorization: Bearer $TOKEN"</span> \\
+  -d <span class="c-w">'{"slug":"users","status":200,
+       "body":"[{\\"id\\":1}]"}'</span>
+
+<span class="c-m"># 2 · call it from any client</span>
+<span class="c-a">curl</span> -i ${esc(o)}/api/u/<span class="c-ok">&lt;your-id&gt;</span>/users
+<span class="c-m">HTTP/2 200
+content-type: application/json
+access-control-allow-origin: *</span>
+
+<span class="c-m"># 3 · protect it with an API key</span>
+<span class="c-a">curl</span> -H <span class="c-ok">"X-API-Key: sk_…"</span> ${esc(o)}/api/u/…/private`;
 }
 
-function logout() { token = ""; localStorage.removeItem("adminToken"); show("login"); }
+/* ---------- list ---------- */
+function render() {
+  const q = $("#search").value.trim().toLowerCase();
+  const items = S.endpoints.filter((e) => !q || e.slug.toLowerCase().includes(q) || (e.description || "").toLowerCase().includes(q));
+  const protectedN = S.endpoints.filter((e) => e.protection).length;
+  $("#stats").innerHTML = `<div class="stat"><b>${S.endpoints.length}</b><span>Endpoints</span></div><div class="stat"><b>${S.endpoints.length - protectedN}</b><span>Open</span></div><div class="stat"><b>${protectedN}</b><span>Protected</span></div><div class="stat"><b>${S.keys.length}</b><span>API keys</span></div>`;
+  $("#count").textContent = q ? `${items.length} of ${S.endpoints.length}` : "";
+  if (!S.endpoints.length) {
+    $("#list").innerHTML = `<div class="empty"><h3>No endpoints yet</h3><p>Create your first one and get a public URL instantly.</p><button class="primary" data-act="new">New endpoint</button></div>`;
+    return;
+  }
+  if (!items.length) { $("#list").innerHTML = `<div class="empty"><p style="margin:0">No endpoints match “${esc(q)}”.</p></div>`; return; }
+  const keyName = (id) => S.keys.find((k) => k.id === id)?.name;
+  $("#list").innerHTML = `<table><thead><tr><th>Method</th><th>Path</th><th>Status</th><th>Format</th><th>Access</th><th></th></tr></thead><tbody>${items.map((e) => {
+    const s = e.status;
+    const access = e.protection
+      ? `<span class="pill lock" title="Header ${esc(e.protection.header)}">Key · ${esc(keyName(e.protection.keyId) ?? "deleted")}</span>`
+      : `<span class="pill open">Open</span>`;
+    return `<tr>
+      <td><span class="m m-${esc(e.method)}">${esc(e.method)}</span></td>
+      <td><a class="path" href="${esc(urlFor(e.slug))}" target="_blank" rel="noopener">/${esc(e.slug)}</a>${e.description ? `<div class="desc">${esc(e.description)}</div>` : ""}</td>
+      <td><span class="st st-${String(s)[0]}">${s}</span> <span class="muted" style="font-size:12px">${esc(STATUS_TEXT[s] || "")}</span>${e.delayMs ? ` <span class="muted mono" style="font-size:11px">+${e.delayMs}ms</span>` : ""}</td>
+      <td class="mono" style="font-size:12px">${esc(e.format === "custom" ? e.contentType : e.format)}</td>
+      <td>${access}</td>
+      <td><div class="actions">
+        <button class="ghost sm" data-act="test" data-slug="${esc(e.slug)}">Test</button>
+        <button class="ghost sm" data-act="url" data-slug="${esc(e.slug)}">URL</button>
+        <button class="ghost sm" data-act="curl" data-slug="${esc(e.slug)}">cURL</button>
+        <button class="ghost sm" data-act="edit" data-slug="${esc(e.slug)}">Edit</button>
+        <button class="ghost sm danger" data-act="del" data-slug="${esc(e.slug)}">Delete</button>
+      </div></td></tr>`;
+  }).join("")}</tbody></table>`;
+}
 
 async function load() {
-  endpoints = await api("endpoints");
+  const me = await api("me");
+  S.base = me.publicBase;
+  $("#baseUrl").textContent = S.base;
+  $("#basePrefix").textContent = S.base.replace(/^https?:\/\//, "");
+  [S.endpoints, S.keys] = await Promise.all([api("endpoints"), api("keys")]);
   render();
 }
 
-function render() {
-  const q = $("#search").value.toLowerCase();
-  const items = endpoints.filter((e) => !q || e.slug.toLowerCase().includes(q) || (e.description || "").toLowerCase().includes(q));
-  $("#count").textContent = `${items.length} de ${endpoints.length}`;
-  if (!items.length) { $("#list").innerHTML = `<div class="empty">No hay APIs todavía. Crea la primera con “+ Nueva API URL”.</div>`; return; }
-  $("#list").innerHTML = `<table><thead><tr><th>URL</th><th>Método</th><th>Status</th><th>Formato</th><th>Contenido</th><th></th></tr></thead><tbody>${
-    items.map((e) => `<tr>
-      <td><a class="url" href="${esc(urlFor(e.slug))}" target="_blank"><code>/api/${esc(e.slug)}</code></a>${e.description ? `<div class="muted">${esc(e.description)}</div>` : ""}</td>
-      <td><span class="badge">${esc(e.method)}</span></td>
-      <td><span class="badge s${String(e.status)[0]}">${e.status}</span></td>
-      <td>${esc(e.format === "custom" ? e.contentType : e.format.toUpperCase())}</td>
-      <td><code class="muted">${esc(e.body.slice(0, 60))}${e.body.length > 60 ? "…" : ""}</code></td>
-      <td><div class="actions">
-        <button data-act="copy" data-slug="${esc(e.slug)}">Copiar URL</button>
-        <button data-act="test" data-slug="${esc(e.slug)}">Probar</button>
-        <button data-act="edit" data-slug="${esc(e.slug)}">Editar</button>
-        <button data-act="del" data-slug="${esc(e.slug)}" class="danger">Borrar</button>
-      </div></td></tr>`).join("")
-  }</tbody></table>`;
+/* ---------- curl ---------- */
+function curlFor(ep) {
+  const m = ep.method === "ANY" ? "GET" : ep.method;
+  let c = `curl -i${m === "GET" ? "" : " -X " + m} "${urlFor(ep.slug || "<path>")}"`;
+  if (ep.protection) {
+    const h = ep.protection.header || "Authorization";
+    c += ` \\\n  -H "${h}: ${h.toLowerCase() === "authorization" ? "Bearer " : ""}<API_KEY>"`;
+  }
+  return c;
 }
 
+/* ---------- editor ---------- */
+function formPayload() {
+  const f = $("#epForm");
+  return {
+    slug: f.slug.value.trim().replace(/^\/+|\/+$/g, ""),
+    method: f.method.value, status: Number(f.status.value), format: f.format.value,
+    contentType: f.contentType.value.trim(), body: f.body.value,
+    delayMs: Number(f.delayMs.value || 0), description: f.description.value.trim(),
+    protection: f.keyId.value ? { keyId: f.keyId.value, header: f.protHeader.value.trim() || "Authorization" } : null,
+  };
+}
+function updateEditorUI() {
+  const f = $("#epForm");
+  const on = !!f.keyId.value;
+  f.protHeader.disabled = !on;
+  $("#protHint").textContent = on
+    ? "Callers must send the key in that header. With Authorization, 'Bearer <key>' is expected."
+    : S.keys.length ? "Open: anyone with the URL can call it." : "Open: anyone with the URL can call it. Create a key in “API Keys” to protect it.";
+  $("#ctWrap").hidden = f.format.value !== "custom";
+  const b = f.body.value;
+  $("#bodyMeta").textContent = `${new Blob([b]).size} bytes`;
+  $("#curlPreview").textContent = curlFor(formPayload());
+}
 function openEditor(ep) {
-  editingSlug = ep ? ep.slug : null;
+  S.editing = ep ? ep.slug : null;
   const f = $("#epForm");
   f.reset();
-  $("#editorTitle").textContent = ep ? "Editar API URL" : "Nueva API URL";
+  $("#editorTitle").textContent = ep ? "Edit endpoint" : "New endpoint";
   $("#formError").textContent = "";
   f.slug.value = ep?.slug ?? "";
   f.method.value = ep?.method ?? "GET";
@@ -173,75 +518,197 @@ function openEditor(ep) {
   f.headers.value = ep && Object.keys(ep.headers || {}).length ? JSON.stringify(ep.headers, null, 2) : "";
   f.delayMs.value = ep?.delayMs ?? 0;
   f.description.value = ep?.description ?? "";
-  $("#ctWrap").hidden = f.format.value !== "custom";
+  f.keyId.innerHTML = `<option value="">None (open)</option>` + S.keys.map((k) => `<option value="${esc(k.id)}">${esc(k.name)} · …${esc(k.hint)}</option>`).join("");
+  if (ep?.protection && !S.keys.some((k) => k.id === ep.protection.keyId)) f.keyId.innerHTML += `<option value="${esc(ep.protection.keyId)}">(deleted key)</option>`;
+  f.keyId.value = ep?.protection?.keyId ?? "";
+  f.protHeader.value = ep?.protection?.header ?? "";
+  updateEditorUI();
   $("#editor").showModal();
+  if (!ep) f.slug.focus();
 }
-
-async function test(slug) {
-  const ep = endpoints.find((e) => e.slug === slug);
-  const method = ep.method === "ANY" ? "GET" : ep.method;
-  const t0 = performance.now();
-  const res = await fetch(urlFor(slug), { method });
-  const text = await res.text();
-  $("#testMeta").textContent = `${method} ${urlFor(slug)} → ${res.status} · ${res.headers.get("content-type")} · ${Math.round(performance.now() - t0)} ms`;
-  $("#testBody").textContent = text;
-  $("#tester").showModal();
-}
-
-$("#basePrefix").textContent = location.host + "/api/";
-
-$("#loginForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  token = $("#tokenInput").value.trim();
-  try { await load(); localStorage.setItem("adminToken", token); show("app"); }
-  catch (err) { $("#loginError").textContent = err.message; show("login"); }
-});
-
-$("#logoutBtn").onclick = logout;
-$("#newBtn").onclick = () => openEditor(null);
-$("#cancelBtn").onclick = () => $("#editor").close();
-$("#closeTester").onclick = () => $("#tester").close();
-$("#search").oninput = render;
-$("#epForm").format.onchange = (e) => { $("#ctWrap").hidden = e.target.value !== "custom"; };
+$("#epForm").addEventListener("input", updateEditorUI);
+$("#epForm").addEventListener("change", updateEditorUI);
 $("#prettyBtn").onclick = () => {
   const f = $("#epForm");
-  try { f.body.value = JSON.stringify(JSON.parse(f.body.value), null, 2); $("#formError").textContent = ""; }
-  catch { $("#formError").textContent = "El contenido no es JSON válido."; }
+  try { f.body.value = JSON.stringify(JSON.parse(f.body.value), null, 2); $("#formError").textContent = ""; updateEditorUI(); }
+  catch { $("#formError").textContent = "The body is not valid JSON."; }
 };
-
 $("#epForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const f = e.target;
-  let headers = {};
+  const payload = formPayload();
+  payload.headers = {};
   if (f.headers.value.trim()) {
-    try { headers = JSON.parse(f.headers.value); } catch { $("#formError").textContent = "Cabeceras: JSON inválido."; return; }
+    try { payload.headers = JSON.parse(f.headers.value); } catch { $("#formError").textContent = "Response headers: invalid JSON."; return; }
   }
-  const payload = {
-    slug: f.slug.value.trim().replace(/^\/+|\/+$/g, ""),
-    method: f.method.value, status: Number(f.status.value), format: f.format.value,
-    contentType: f.contentType.value.trim(), body: f.body.value, headers,
-    delayMs: Number(f.delayMs.value || 0), description: f.description.value.trim(),
-  };
   try {
-    if (editingSlug) await api("endpoints/" + editingSlug.split("/").map(encodeURIComponent).join("/"), { method: "PUT", body: JSON.stringify(payload) });
+    if (S.editing) await api("endpoints/" + enc(S.editing), { method: "PUT", body: JSON.stringify(payload) });
     else await api("endpoints", { method: "POST", body: JSON.stringify(payload) });
     $("#editor").close();
     await load();
+    toast("Endpoint saved");
   } catch (err) { $("#formError").textContent = err.message; }
 });
 
+/* ---------- tester ---------- */
+async function runTest() {
+  const ep = S.testing;
+  const method = ep.method === "ANY" ? "GET" : ep.method;
+  const headers = {};
+  if (ep.protection) {
+    const key = $("#testKey").value.trim();
+    if (key) headers[ep.protection.header] = ep.protection.header.toLowerCase() === "authorization" ? "Bearer " + key : key;
+  }
+  const t0 = performance.now();
+  try {
+    const res = await fetch(urlFor(ep.slug), { method, headers });
+    const text = await res.text();
+    const ms = Math.round(performance.now() - t0);
+    let body = text;
+    try { body = JSON.stringify(JSON.parse(text), null, 2); } catch {}
+    $("#testStatus").textContent = `${res.status} ${res.statusText || STATUS_TEXT[res.status] || ""}`;
+    $("#testStatus").className = "st st-" + String(res.status)[0];
+    $("#testMeta").textContent = `${ms} ms · ${new Blob([text]).size} B`;
+    $("#testHeaders").textContent = [...res.headers].map(([k, v]) => `${k}: ${v}`).join("\n");
+    $("#testBody").textContent = body || "(empty)";
+  } catch (err) {
+    $("#testStatus").textContent = "Network error"; $("#testStatus").className = "st st-5";
+    $("#testMeta").textContent = err.message; $("#testHeaders").textContent = ""; $("#testBody").textContent = "";
+  }
+  $("#testResult").hidden = false;
+}
+function openTester(ep) {
+  S.testing = ep;
+  const method = ep.method === "ANY" ? "GET" : ep.method;
+  $("#testReq").innerHTML = `<span class="m m-${esc(method)}">${esc(method)}</span> ${esc(urlFor(ep.slug))}`;
+  $("#testResult").hidden = true;
+  $("#testKey").value = "";
+  $("#testKeyWrap").hidden = !ep.protection;
+  if (ep.protection) $("#testKeyLabel").textContent = `API key (header ${ep.protection.header})`;
+  $("#tester").showModal();
+  if (ep.protection) { $("#testKey").focus(); } else runTest();
+}
+$("#testSend").onclick = runTest;
+$("#testKey").addEventListener("keydown", (e) => { if (e.key === "Enter") runTest(); });
+
+/* ---------- table actions ---------- */
 $("#list").addEventListener("click", async (e) => {
   const btn = e.target.closest("button[data-act]");
   if (!btn) return;
-  const slug = btn.dataset.slug;
   const act = btn.dataset.act;
-  if (act === "copy") { await navigator.clipboard.writeText(urlFor(slug)); btn.textContent = "¡Copiada!"; setTimeout(() => (btn.textContent = "Copiar URL"), 1200); }
-  if (act === "test") test(slug);
-  if (act === "edit") openEditor(endpoints.find((x) => x.slug === slug));
-  if (act === "del" && confirm(`¿Borrar /api/${slug}?`)) { await api("endpoints/" + slug.split("/").map(encodeURIComponent).join("/"), { method: "DELETE" }); await load(); }
+  if (act === "new") return openEditor(null);
+  const ep = S.endpoints.find((x) => x.slug === btn.dataset.slug);
+  if (!ep) return;
+  if (act === "url") copy(urlFor(ep.slug), "URL copied");
+  if (act === "curl") copy(curlFor(ep), "cURL copied");
+  if (act === "test") openTester(ep);
+  if (act === "edit") openEditor(ep);
+  if (act === "del" && confirm(`Delete /${ep.slug}? This cannot be undone.`)) {
+    try { await api("endpoints/" + enc(ep.slug), { method: "DELETE" }); await load(); toast("Endpoint deleted"); }
+    catch (err) { toast(err.message); }
+  }
 });
 
-if (token) load().then(() => show("app")).catch(() => show("login")); else show("login");
+/* ---------- API keys ---------- */
+function renderKeys() {
+  $("#keysList").innerHTML = S.keys.length
+    ? `<table class="mini-table"><thead><tr><th>Name</th><th>Value</th><th>Used by</th><th></th></tr></thead><tbody>${S.keys.map((k) => {
+        const n = S.endpoints.filter((e) => e.protection?.keyId === k.id).length;
+        return `<tr><td>${esc(k.name)}</td><td class="mono">…${esc(k.hint)}</td><td>${n} endpoint${n === 1 ? "" : "s"}</td><td style="text-align:right"><button class="ghost sm danger" data-key="${esc(k.id)}">Delete</button></td></tr>`;
+      }).join("")}</tbody></table>`
+    : `<div class="empty" style="padding:28px"><p style="margin:0">You have no keys yet.</p></div>`;
+}
+$("#keysBtn").onclick = () => { $("#keysError").textContent = ""; $("#keyNewWrap").hidden = true; renderKeys(); $("#keysDlg").showModal(); };
+$("#keysList").addEventListener("click", async (e) => {
+  const id = e.target.dataset?.key;
+  if (!id || !confirm("Delete this key?")) return;
+  try { await api("keys/" + id, { method: "DELETE" }); S.keys = await api("keys"); renderKeys(); render(); $("#keysError").textContent = ""; }
+  catch (err) { $("#keysError").textContent = err.message; }
+});
+$("#keyForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const payload = { name: f.name.value.trim() };
+  if (f.value.value.trim()) payload.value = f.value.value.trim();
+  try {
+    const k = await api("keys", { method: "POST", body: JSON.stringify(payload) });
+    S.keys = await api("keys");
+    f.reset(); renderKeys(); render();
+    $("#keyNew").textContent = k.value; $("#keyNewWrap").hidden = false; $("#keysError").textContent = "";
+  } catch (err) { $("#keysError").textContent = err.message; }
+});
+$("#keyCopy").onclick = () => copy($("#keyNew").textContent, "Key copied");
+
+/* ---------- LLM access ---------- */
+async function refreshToken(newToken) {
+  const info = await fetch("/auth/token").then((r) => r.json());
+  $("#tokenNewWrap").hidden = !newToken;
+  if (newToken) {
+    $("#tokenValue").textContent = newToken;
+    $("#promptValue").textContent = `Read ${location.origin}/llms.txt and use this token to manage my endpoints: ${newToken}`;
+  }
+  $("#tokenStatus").textContent = newToken ? "Copy it now: it will not be shown again." : info.hasToken ? `Active token (ends in …${info.hint}). Regenerating invalidates the previous one.` : "You have not generated a token yet.";
+  $("#tokenGen").textContent = info.hasToken ? "Regenerate token" : "Generate token";
+  $("#tokenRevoke").hidden = !info.hasToken;
+}
+$("#llmBtn").onclick = async () => { $("#tokenError").textContent = ""; $("#llmsUrl").textContent = location.origin + "/llms.txt"; await refreshToken(); $("#llmDlg").showModal(); };
+$("#tokenGen").onclick = async () => {
+  if ($("#tokenGen").textContent.startsWith("Regenerate") && !confirm("The current token will stop working. Continue?")) return;
+  const res = await fetch("/auth/token", { method: "POST" });
+  if (!res.ok) { $("#tokenError").textContent = "Could not generate the token."; return; }
+  await refreshToken((await res.json()).token);
+};
+$("#tokenRevoke").onclick = async () => {
+  if (!confirm("Revoke the token? Integrations using it will stop working.")) return;
+  await fetch("/auth/token", { method: "DELETE" });
+  await refreshToken();
+};
+$("#tokenCopy").onclick = () => copy($("#tokenValue").textContent, "Token copied");
+$("#promptCopy").onclick = () => copy($("#promptValue").textContent, "Prompt copied");
+
+/* ---------- global wiring ---------- */
+document.addEventListener("click", (e) => {
+  const c = e.target.closest("[data-close]");
+  if (c) $("#" + c.dataset.close).close();
+  if (e.target.matches("dialog")) e.target.close(); // click on backdrop
+});
+$("#newBtn").onclick = () => openEditor(null);
+$("#copyBase").onclick = () => copy(S.base, "Base URL copied");
+$("#search").oninput = render;
+document.addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey || !S.user || document.querySelector("dialog[open]")) return;
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName);
+  if (e.key === "/" && !typing) { e.preventDefault(); $("#search").focus(); }
+  if (e.key.toLowerCase() === "n" && !typing) { e.preventDefault(); openEditor(null); }
+});
+
+async function logout() {
+  await fetch("/auth/logout", { method: "POST" }).catch(() => {});
+  S.user = null;
+  document.querySelectorAll("dialog[open]").forEach((d) => d.close());
+  view("landing");
+}
+$("#logoutBtn").onclick = logout;
+
+const LOGIN_ERRORS = { denied: "Sign-in was cancelled.", state: "Invalid sign-in session, please try again.", token: "Google rejected the sign-in.", userinfo: "Could not read your Google account.", unverified: "Your Google email is not verified.", forbidden: "This Google account does not have access." };
+
+async function init() {
+  renderDemo();
+  const err = new URLSearchParams(location.search).get("login_error");
+  if (err) history.replaceState(null, "", "/");
+  const me = await fetch("/auth/me").then(async (r) => ({ ok: r.ok, data: await r.json() })).catch(() => null);
+  if (me?.ok) {
+    S.user = me.data.user;
+    $("#userEmail").textContent = S.user.email;
+    $("#avatar").textContent = (S.user.name || S.user.email)[0].toUpperCase();
+    try { await load(); view("app"); return; } catch {}
+  }
+  const enabled = !!me?.data?.googleEnabled;
+  $("#googleBtn").hidden = !enabled;
+  $("#loginError").textContent = err ? (LOGIN_ERRORS[err] || "Sign-in error.") : !enabled ? "Google sign-in is not configured on this server." : "";
+  view("landing");
+}
+init();
 </script>
 </body>
 </html>

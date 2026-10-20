@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Privacy Policy · My Custom API</title>
+<meta name="description" content="What data My Custom API processes, why, and what rights you have." />
+<link rel="stylesheet" href="/legal.css" />
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="/"><span class="logo">{}</span> My Custom API</a>
+  <span class="spacer"></span>
+  <div class="lang" role="group" aria-label="Idioma / Language"><button data-l="en" aria-pressed="true">EN</button><button data-l="es" aria-pressed="false">ES</button></div>
+</header>
+<main>
+
+<section lang="es">
+<h1>Política de Privacidad</h1>
+<p class="updated">Última actualización: 20 de octubre de 2026</p>
+<p>Esta política explica qué datos personales trata <b>My Custom API</b> en <code>mycustomapi.online</code> (el «Servicio»), con qué fin y qué derechos tienes. Aplica únicamente a la instancia alojada en ese dominio. El código es open source y cualquiera puede desplegar su propia versión: quien lo haga es responsable de su propia instancia y de su propia política.</p>
+<div class="note"><b>Resumen:</b> solo usamos tu cuenta de Google para identificarte y separar tus datos de los de otros usuarios. No hay publicidad, ni analítica, ni venta de datos.</div>
+
+<h2>1. Responsable</h2>
+<p>El responsable es el operador de <code>mycustomapi.online</code> (GitHub: <a href="https://github.com/JorgeRZT" target="_blank" rel="noopener">JorgeRZT</a>). Para cualquier cuestión de privacidad, abre un <i>issue</i> en <a href="https://github.com/JorgeRZT/my-custom-api/issues" target="_blank" rel="noopener">https://github.com/JorgeRZT/my-custom-api/issues</a> (sin incluir datos personales sensibles; te indicaremos un canal privado si hace falta).</p>
+
+<h2>2. Datos que tratamos</h2>
+<table>
+<tr><th>Datos</th><th>Origen</th><th>Para qué</th></tr>
+<tr><td>Email, nombre y foto de perfil de tu cuenta de Google, e identificador interno aleatorio</td><td>Inicio de sesión con Google (permisos <code>openid</code>, <code>email</code>, <code>profile</code>)</td><td>Identificarte, mostrar tu cuenta y asignarte tu espacio privado</td></tr>
+<tr><td>Endpoints que creas (ruta, cuerpo, cabeceras, estado, descripción…)</td><td>Tú</td><td>Prestar el Servicio: servir tus URLs públicas</td></tr>
+<tr><td>API keys y token personal: solo un <i>hash</i> (SHA-256) y los 4 últimos caracteres, más el nombre y la fecha</td><td>Tú</td><td>Proteger tus endpoints y dar acceso a tus integraciones. No guardamos el valor en claro</td></tr>
+<tr><td>Sesión (identificador aleatorio asociado a tu cuenta, caduca a los 7 días)</td><td>Generada al iniciar sesión</td><td>Mantener tu sesión abierta</td></tr>
+<tr><td>Datos técnicos de las peticiones (URL, método, estado, tiempos, dirección IP)</td><td>Tu navegador o quien llame a tus endpoints</td><td>Seguridad, prevención de abusos y diagnóstico. Los gestiona la infraestructura de Cloudflare</td></tr>
+</table>
+<p>No recibimos tu contraseña de Google. No pedimos acceso a tu correo, contactos, calendario ni a ningún otro dato de Google.</p>
+<p>Los endpoints son <b>públicos</b> para cualquiera que conozca la URL, salvo los que protejas con una API key. No almacenes en ellos datos personales de terceros, secretos ni información sensible.</p>
+
+<h2>3. Cookies y almacenamiento local</h2>
+<ul>
+<li><code>session</code>: cookie técnica, <i>HttpOnly</i>, necesaria para mantener tu sesión (7 días).</li>
+<li><code>oauth_state</code>: cookie técnica de seguridad durante el inicio de sesión (10 minutos).</li>
+<li><code>theme</code> (almacenamiento local del navegador): recuerda si prefieres tema claro u oscuro.</li>
+</ul>
+<p>Solo usamos elementos estrictamente necesarios o de preferencia; no usamos cookies de publicidad ni de analítica, por lo que no mostramos banner de consentimiento.</p>
+
+<h2>4. Base jurídica</h2>
+<p>Tratamos tus datos para <b>ejecutar el servicio que solicitas</b> al registrarte (art. 6.1.b RGPD) y por nuestro <b>interés legítimo</b> en la seguridad y la prevención de abusos (art. 6.1.f RGPD).</p>
+
+<h2>5. Con quién los compartimos</h2>
+<ul>
+<li><b>Google LLC</b>, para autenticarte (Google Sign-In).</li>
+<li><b>Cloudflare, Inc.</b>, proveedor de alojamiento (Workers), almacenamiento (KV), DNS y red de distribución. Actúa como encargado del tratamiento y puede tratar datos fuera del Espacio Económico Europeo bajo las garantías que ofrece (cláusulas contractuales tipo).</li>
+</ul>
+<p>No vendemos ni cedemos tus datos a terceros con fines comerciales y no elaboramos perfiles. Podremos comunicar datos si una autoridad competente nos lo exige legalmente.</p>
+<p>El uso que hacemos de la información recibida de las APIs de Google cumple la <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Política de datos de usuario de los servicios de API de Google</a>, incluidos los requisitos de uso limitado.</p>
+
+<h2>6. Conservación</h2>
+<ul>
+<li>Datos de cuenta y contenido: mientras mantengas tu cuenta. Puedes borrar tus endpoints, API keys y token en cualquier momento desde el panel.</li>
+<li>Sesiones: caducan a los 7 días o al cerrar sesión.</li>
+<li>Registros técnicos: durante el periodo limitado que establece Cloudflare.</li>
+<li>Si solicitas la eliminación de tu cuenta, borraremos tus datos de forma razonablemente rápida, salvo los que debamos conservar por obligación legal.</li>
+</ul>
+
+<h2>7. Tus derechos</h2>
+<p>Puedes ejercer los derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad abriendo un <i>issue</i> como se indica en el apartado 1. Si consideras que no tratamos tus datos conforme a la ley, puedes reclamar ante la autoridad de protección de datos de tu país (en España, la <a href="https://www.aepd.es" target="_blank" rel="noopener">AEPD</a>).</p>
+
+<h2>8. Seguridad</h2>
+<p>Todo el tráfico va cifrado (HTTPS), las claves y tokens se guardan hasheados y las cookies de sesión son <i>HttpOnly</i>. Ningún sistema es infalible y no podemos garantizar seguridad absoluta.</p>
+
+<h2>9. Menores</h2>
+<p>El Servicio no está dirigido a menores de 16 años.</p>
+
+<h2>10. Cambios</h2>
+<p>Podemos actualizar esta política. La fecha de arriba indica la última versión y el historial de cambios es público en el <a href="https://github.com/JorgeRZT/my-custom-api" target="_blank" rel="noopener">repositorio</a>. Si el cambio es relevante, lo avisaremos en el Servicio.</p>
+</section>
+
+<section lang="en">
+<h1>Privacy Policy</h1>
+<p class="updated">Last updated: October 20, 2026</p>
+<p>This policy explains what personal data <b>My Custom API</b> processes at <code>mycustomapi.online</code> (the “Service”), why, and what rights you have. It applies only to the instance hosted at that domain. The code is open source and anyone can deploy their own version: whoever does so is responsible for their own instance and policy.</p>
+<div class="note"><b>Summary:</b> we only use your Google account to identify you and keep your data separate from other users’. No ads, no analytics, no selling of data.</div>
+
+<h2>1. Controller</h2>
+<p>The controller is the operator of <code>mycustomapi.online</code> (GitHub: <a href="https://github.com/JorgeRZT" target="_blank" rel="noopener">JorgeRZT</a>). For any privacy matter, open an issue at <a href="https://github.com/JorgeRZT/my-custom-api/issues" target="_blank" rel="noopener">https://github.com/JorgeRZT/my-custom-api/issues</a> (without including sensitive personal data; we will point you to a private channel if needed).</p>
+
+<h2>2. Data we process</h2>
+<table>
+<tr><th>Data</th><th>Source</th><th>Purpose</th></tr>
+<tr><td>Email, name and profile picture of your Google account, plus a random internal ID</td><td>Sign in with Google (<code>openid</code>, <code>email</code>, <code>profile</code> scopes)</td><td>Identify you, show your account and assign your private space</td></tr>
+<tr><td>Endpoints you create (path, body, headers, status, description…)</td><td>You</td><td>Provide the Service: serve your public URLs</td></tr>
+<tr><td>API keys and personal token: only a SHA-256 <i>hash</i> and the last 4 characters, plus name and date</td><td>You</td><td>Protect your endpoints and authorize your integrations. We never store the plain value</td></tr>
+<tr><td>Session (random identifier linked to your account, expires after 7 days)</td><td>Created when you sign in</td><td>Keep you signed in</td></tr>
+<tr><td>Technical request data (URL, method, status, timings, IP address)</td><td>Your browser or whoever calls your endpoints</td><td>Security, abuse prevention and troubleshooting. Handled by Cloudflare’s infrastructure</td></tr>
+</table>
+<p>We do not receive your Google password. We do not request access to your email, contacts, calendar or any other Google data.</p>
+<p>Endpoints are <b>public</b> to anyone who knows the URL, except those you protect with an API key. Do not store third parties’ personal data, secrets or sensitive information in them.</p>
+
+<h2>3. Cookies and local storage</h2>
+<ul>
+<li><code>session</code>: <i>HttpOnly</i> technical cookie required to keep you signed in (7 days).</li>
+<li><code>oauth_state</code>: technical security cookie used during sign-in (10 minutes).</li>
+<li><code>theme</code> (browser local storage): remembers your light/dark preference.</li>
+</ul>
+<p>We only use strictly necessary or preference items; no advertising or analytics cookies, so there is no consent banner.</p>
+
+<h2>4. Legal basis</h2>
+<p>We process your data to <b>perform the service you request</b> when you sign up (GDPR art. 6(1)(b)) and for our <b>legitimate interest</b> in security and abuse prevention (art. 6(1)(f)).</p>
+
+<h2>5. Who we share it with</h2>
+<ul>
+<li><b>Google LLC</b>, to authenticate you (Google Sign-In).</li>
+<li><b>Cloudflare, Inc.</b>, hosting (Workers), storage (KV), DNS and CDN provider. It acts as a processor and may process data outside the European Economic Area under the safeguards it provides (standard contractual clauses).</li>
+</ul>
+<p>We do not sell or share your data with third parties for commercial purposes and we do not build profiles. We may disclose data if a competent authority legally requires it.</p>
+<p>Our use of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google API Services User Data Policy</a>, including its Limited Use requirements.</p>
+
+<h2>6. Retention</h2>
+<ul>
+<li>Account data and content: as long as you keep your account. You can delete your endpoints, API keys and token at any time from the dashboard.</li>
+<li>Sessions: expire after 7 days or when you sign out.</li>
+<li>Technical logs: for the limited period set by Cloudflare.</li>
+<li>If you request account deletion, we will delete your data within a reasonable time, except what we must keep by legal obligation.</li>
+</ul>
+
+<h2>7. Your rights</h2>
+<p>You may exercise your rights of access, rectification, erasure, objection, restriction and portability by opening an issue as described in section 1. If you believe we are not processing your data lawfully, you can complain to the data protection authority of your country.</p>
+
+<h2>8. Security</h2>
+<p>All traffic is encrypted (HTTPS), keys and tokens are stored hashed and session cookies are <i>HttpOnly</i>. No system is perfect and we cannot guarantee absolute security.</p>
+
+<h2>9. Children</h2>
+<p>The Service is not directed at children under 16.</p>
+
+<h2>10. Changes</h2>
+<p>We may update this policy. The date above shows the latest version and the change history is public in the <a href="https://github.com/JorgeRZT/my-custom-api" target="_blank" rel="noopener">repository</a>. For relevant changes we will notify you in the Service.</p>
+</section>
+</main>
+<footer class="site">
+  <span>© My Custom API</span>
+  <a href="/privacy">Privacy</a>
+  <a href="/terms">Terms</a>
+  <a href="https://github.com/JorgeRZT/my-custom-api" target="_blank" rel="noopener">GitHub</a>
+</footer>
+<script src="/legal.js"></script>
+</body>
+</html>
