@@ -11,6 +11,11 @@ Crea tus propias URLs de API públicas en Cloudflare Workers y define qué devue
 - Cabeceras extra, retardo simulado (0–10 s), descripción
 - Copiar URL, probar respuesta, editar y borrar desde el dashboard
 - Almacenamiento en Cloudflare KV
+- Documentación para LLMs: `/llms.txt` (instrucciones en lenguaje natural) y `/openapi.json` (OpenAPI 3.1)
+
+## Uso con un LLM
+Pasa al LLM la URL `https://<tu-worker>/llms.txt` y tu `ADMIN_TOKEN`. Con esa información puede listar, crear, editar y borrar endpoints usando la Admin API.
+Para herramientas que importan OpenAPI (GPT Actions, function calling, etc.) usa `https://<tu-worker>/openapi.json` con autenticación Bearer.
 
 ## Desarrollo local
 ```bash
@@ -32,7 +37,7 @@ npx wrangler secret put ADMIN_TOKEN      # define el token del dashboard
 |---|---|---|
 | GET | `/_admin/endpoints` | Listar |
 | POST | `/_admin/endpoints` | Crear |
-| GET/PUT/DELETE | `/_admin/endpoints/<ruta>` | Ver / actualizar / borrar |
+| GET/PUT/DELETE | `/_admin/endpoints/<ruta>` | Ver / actualizar (parcial) / borrar |
 
 Ejemplo:
 ```bash
