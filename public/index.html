@@ -48,7 +48,7 @@
   <div class="actions">
     <a class="btn" href="/llms.txt" target="_blank" title="Documentación para LLMs">🤖 llms.txt</a>
     <a class="btn" href="/openapi.json" target="_blank" title="Especificación OpenAPI">OpenAPI</a>
-    <span id="headerActions" hidden><span class="muted" id="userInfo"></span> <button id="logoutBtn">Salir</button></span>
+    <span id="headerActions" hidden><span class="muted" id="userInfo"></span> <button id="tokenBtn" hidden>🔑 Mi token</button> <button id="logoutBtn">Salir</button></span>
   </div>
 </header>
 
@@ -58,7 +58,7 @@
     <a class="btn" id="googleBtn" href="/auth/google" style="width:100%;text-align:center;padding:10px 12px">Continuar con Google</a>
     <p class="muted" style="text-align:center;margin:12px 0">o con token</p>
   </div>
-  <p class="muted">Introduce tu <code>ADMIN_TOKEN</code>.</p>
+  <p class="muted">Introduce tu token (el <code>ADMIN_TOKEN</code> o tu token personal).</p>
   <form id="loginForm">
     <input id="tokenInput" type="password" placeholder="Admin token" autocomplete="current-password" required />
     <div class="error" id="loginError"></div>
@@ -102,6 +102,20 @@
   </form>
 </dialog>
 
+<dialog id="tokenDlg">
+  <h2 style="margin-top:0">Mi token de API</h2>
+  <p class="muted">Úsalo como <code>Authorization: Bearer &lt;token&gt;</code> en <code>/_admin/endpoints</code> (o pásaselo a un LLM junto con <code>/llms.txt</code>). Solo da acceso a <b>tus</b> APIs.</p>
+  <div id="tokenStatus" class="muted"></div>
+  <pre id="tokenValue" hidden></pre>
+  <div class="error" id="tokenError"></div>
+  <div class="actions" style="justify-content:flex-end;margin-top:12px">
+    <button id="tokenCopy" hidden>Copiar</button>
+    <button id="tokenRevoke" class="danger" hidden>Revocar</button>
+    <button id="tokenGen" class="primary"></button>
+    <button id="tokenClose">Cerrar</button>
+  </div>
+</dialog>
+
 <dialog id="tester">
   <h2 style="margin-top:0">Prueba</h2>
   <div class="muted" id="testMeta"></div>
@@ -111,7 +125,8 @@
 
 <script>
 const $ = (s) => document.querySelector(s);
-const BASE = location.origin + "/api/";
+let BASE = location.origin + "/api/";
+let isSession = false;
 let token = localStorage.getItem("adminToken") || "";
 let googleEnabled = false;
 let endpoints = [];
@@ -139,10 +154,16 @@ async function logout() {
   token = ""; localStorage.removeItem("adminToken");
   await fetch("/auth/logout", { method: "POST" }).catch(() => {});
   $("#userInfo").textContent = "";
+  $("#tokenBtn").hidden = true;
+  isSession = false;
   show("login");
 }
 
 async function load() {
+  const me = await api("me");
+  BASE = me.publicBase;
+  $("#basePrefix").textContent = BASE.replace(/^https?:\/\//, "");
+  if (me.scope === "global" && !isSession) $("#userInfo").textContent = "ADMIN_TOKEN (APIs globales)";
   endpoints = await api("endpoints");
   render();
 }
@@ -198,7 +219,6 @@ async function test(slug) {
   $("#tester").showModal();
 }
 
-$("#basePrefix").textContent = location.host + "/api/";
 
 $("#loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -208,6 +228,30 @@ $("#loginForm").addEventListener("submit", async (e) => {
 });
 
 $("#logoutBtn").onclick = logout;
+
+async function refreshTokenDlg(newToken) {
+  const info = await fetch("/auth/token").then((r) => r.json());
+  $("#tokenValue").hidden = !newToken;
+  $("#tokenCopy").hidden = !newToken;
+  if (newToken) $("#tokenValue").textContent = newToken;
+  $("#tokenStatus").textContent = newToken ? "Cópialo ahora: no volverá a mostrarse." : info.hasToken ? `Token activo (termina en …${info.hint}).` : "Todavía no has generado ningún token.";
+  $("#tokenGen").textContent = info.hasToken ? "Regenerar" : "Generar token";
+  $("#tokenRevoke").hidden = !info.hasToken;
+}
+$("#tokenBtn").onclick = async () => { $("#tokenError").textContent = ""; await refreshTokenDlg(); $("#tokenDlg").showModal(); };
+$("#tokenClose").onclick = () => $("#tokenDlg").close();
+$("#tokenGen").onclick = async () => {
+  if ($("#tokenGen").textContent === "Regenerar" && !confirm("El token actual dejará de funcionar. ¿Continuar?")) return;
+  const res = await fetch("/auth/token", { method: "POST" });
+  if (!res.ok) { $("#tokenError").textContent = "No se pudo generar el token."; return; }
+  await refreshTokenDlg((await res.json()).token);
+};
+$("#tokenRevoke").onclick = async () => {
+  if (!confirm("¿Revocar el token? Las integraciones que lo usen dejarán de funcionar.")) return;
+  await fetch("/auth/token", { method: "DELETE" });
+  await refreshTokenDlg();
+};
+$("#tokenCopy").onclick = async () => { await navigator.clipboard.writeText($("#tokenValue").textContent); $("#tokenCopy").textContent = "¡Copiado!"; setTimeout(() => ($("#tokenCopy").textContent = "Copiar"), 1200); };
 $("#newBtn").onclick = () => openEditor(null);
 $("#cancelBtn").onclick = () => $("#editor").close();
 $("#closeTester").onclick = () => $("#tester").close();
@@ -259,6 +303,8 @@ async function init() {
   const me = await fetch("/auth/me").then(async (r) => ({ ok: r.ok, data: await r.json() })).catch(() => null);
   if (me?.ok) {
     $("#userInfo").textContent = me.data.user.email;
+    $("#tokenBtn").hidden = false;
+    isSession = true;
     token = "";
   } else {
     googleEnabled = !!me?.data?.googleEnabled;

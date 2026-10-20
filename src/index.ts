@@ -1,8 +1,8 @@
-import { getSession, handleAuth } from "./auth";
+import { authenticate, describePrincipal, handleAuth } from "./auth";
 import { llmsTxt, openApiSpec } from "./docs";
 import {
-  Env, FORMATS, contentTypeFor, createEndpoint, deleteEndpoint, getEndpoint, isAuthorized,
-  listEndpoints, normalizeSlug, updateEndpoint, Result,
+  Env, FORMATS, GLOBAL_NS, contentTypeFor, createEndpoint, deleteEndpoint, getEndpoint,
+  listEndpoints, userNs, normalizeSlug, updateEndpoint, Result,
 } from "./store";
 
 export type { Env };
@@ -23,10 +23,16 @@ function json(data: unknown, status = 200, extra: Record<string, string> = {}): 
 
 const fromResult = <T>(r: Result<T>) => (r.ok ? json(r.data, r.status) : json({ error: r.error }, r.status));
 
-async function handlePublic(req: Request, env: Env, slug: string): Promise<Response> {
+const USER_SLUG_RE = /^u\/([a-f0-9]{12})\/(.+)$/;
+
+async function handlePublic(req: Request, env: Env, rawSlug: string): Promise<Response> {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
 
-  const ep = await getEndpoint(env, slug);
+  // /api/u/<userId>/<slug> belongs to a user; anything else is the global (legacy) set.
+  const m = USER_SLUG_RE.exec(rawSlug);
+  const ns = m ? userNs(m[1]) : GLOBAL_NS;
+  const slug = m ? m[2] : rawSlug;
+  const ep = await getEndpoint(env, ns, slug);
   if (!ep) return json({ error: "Endpoint not found", slug }, 404, CORS);
 
   const method = req.method === "HEAD" ? "GET" : req.method;
@@ -43,15 +49,19 @@ async function handlePublic(req: Request, env: Env, slug: string): Promise<Respo
   });
 }
 
-async function handleAdmin(req: Request, env: Env, path: string): Promise<Response> {
-  if (!isAuthorized(req, env) && !(await getSession(req, env))) return json({ error: "Unauthorized" }, 401);
+async function handleAdmin(req: Request, env: Env, path: string, origin: string): Promise<Response> {
+  const principal = await authenticate(req, env);
+  if (!principal) return json({ error: "Unauthorized" }, 401);
+  const ns = principal.ns;
   const readBody = () => req.json<any>().catch(() => null);
 
+  if (path === "me" && req.method === "GET") return json(describePrincipal(principal, origin));
+
   if (path === "endpoints" || path === "endpoints/") {
-    if (req.method === "GET") return json(await listEndpoints(env));
+    if (req.method === "GET") return json(await listEndpoints(env, ns));
     if (req.method === "POST") {
       const input = await readBody();
-      return input ? fromResult(await createEndpoint(env, input)) : json({ error: "Invalid JSON body" }, 400);
+      return input ? fromResult(await createEndpoint(env, ns, input)) : json({ error: "Invalid JSON body" }, 400);
     }
     return json({ error: "Method not allowed" }, 405);
   }
@@ -59,14 +69,14 @@ async function handleAdmin(req: Request, env: Env, path: string): Promise<Respon
   if (path.startsWith("endpoints/")) {
     const slug = normalizeSlug(path.slice("endpoints/".length));
     if (req.method === "GET") {
-      const ep = await getEndpoint(env, slug);
+      const ep = await getEndpoint(env, ns, slug);
       return ep ? json(ep) : json({ error: "Not found" }, 404);
     }
     if (req.method === "PUT" || req.method === "PATCH") {
       const input = await readBody();
-      return input ? fromResult(await updateEndpoint(env, slug, input)) : json({ error: "Invalid JSON body" }, 400);
+      return input ? fromResult(await updateEndpoint(env, ns, slug, input)) : json({ error: "Invalid JSON body" }, 400);
     }
-    if (req.method === "DELETE") return fromResult(await deleteEndpoint(env, slug));
+    if (req.method === "DELETE") return fromResult(await deleteEndpoint(env, ns, slug));
     return json({ error: "Method not allowed" }, 405);
   }
 
@@ -79,7 +89,7 @@ export default {
     const p = url.pathname;
     try {
       if (p.startsWith("/api/")) return await handlePublic(req, env, normalizeSlug(p.slice(5)));
-      if (p.startsWith("/_admin/")) return await handleAdmin(req, env, p.slice(8));
+      if (p.startsWith("/_admin/")) return await handleAdmin(req, env, p.slice(8), url.origin);
       if (p.startsWith("/auth/")) return await handleAuth(req, env, p.slice(6));
       if (p === "/llms.txt") {
         return new Response(llmsTxt(url.origin), { headers: { "Content-Type": "text/plain; charset=utf-8", ...CORS } });

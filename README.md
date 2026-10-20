@@ -3,7 +3,7 @@
 Crea tus propias URLs de API públicas en Cloudflare Workers y define qué devuelven (contenido, status code y formato) desde un dashboard.
 
 - **Dashboard**: `https://<tu-worker>.workers.dev/` (protegido con `ADMIN_TOKEN`)
-- **APIs públicas**: `https://<tu-worker>.workers.dev/api/<ruta>` (abiertas, con CORS `*`)
+- **APIs públicas**: `https://<tu-worker>.workers.dev/api/<ruta>` o, por usuario, `/api/u/<id>/<ruta>` (abiertas, con CORS `*`)
 
 ## Funcionalidades
 - Rutas anidadas (`/api/users/list`), método (`ANY`, `GET`, `POST`, …), status code 200–599
@@ -27,6 +27,13 @@ npx wrangler secret put GOOGLE_CLIENT_ID
 npx wrangler secret put GOOGLE_CLIENT_SECRET
 npx wrangler secret put ALLOWED_EMAILS
 ```
+### APIs y token por usuario
+- Cada cuenta de Google tiene **su propio conjunto de APIs**, públicas en `https://<worker>/api/u/<tu-id>/<ruta>`. El dashboard muestra la URL correcta y nadie ve ni toca las APIs de otra cuenta.
+- En el dashboard, **🔑 Mi token** genera un token personal (`mca_…`). Se muestra una sola vez, se guarda hasheado y se puede regenerar o revocar. Se usa como `Authorization: Bearer mca_…` en la Admin API y solo da acceso a tus APIs. Los tokens solo se gestionan desde una sesión de Google, nunca con otro token.
+- `GET /_admin/me` devuelve el conjunto que gestiona el token y su `publicBase`.
+- El `ADMIN_TOKEN` global sigue existiendo y gestiona las APIs antiguas en `/api/<ruta>`.
+- `ALLOWED_EMAILS` admite también `*` para permitir cualquier cuenta de Google.
+
 Las sesiones duran 7 días, se guardan en KV y quitar un email de `ALLOWED_EMAILS` las invalida.
 
 ## Uso con un LLM
