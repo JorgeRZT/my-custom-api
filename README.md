@@ -1,5 +1,13 @@
 # My Custom API
 
+[![CI](https://github.com/JorgeRZT/my-custom-api/actions/workflows/ci.yml/badge.svg)](https://github.com/JorgeRZT/my-custom-api/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/JorgeRZT/my-custom-api?sort=semver)](https://github.com/JorgeRZT/my-custom-api/releases)
+[![License: MIT](https://img.shields.io/github/license/JorgeRZT/my-custom-api)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/JorgeRZT/my-custom-api)](https://github.com/JorgeRZT/my-custom-api/commits/main)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com)
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fmycustomapi.online&label=mycustomapi.online)](https://mycustomapi.online)
+
 Create public HTTP endpoints in seconds and decide exactly what they return — body, status code, format, headers and latency. Built on Cloudflare Workers + KV, with Google sign-in, a private space per account, optional API keys per endpoint, and first-class documentation for LLMs.
 
 Hosted instance: **https://mycustomapi.online** · [Privacy](public/privacy.html) · [Terms](public/terms.html)
